@@ -239,11 +239,12 @@ function TelemetryCar({ points, onTelemetryUpdate }) {
 function PitWindowMarker({ position }) {
   const markerRef = useRef();
   const ringRef = useRef();
+  const beamRef = useRef();
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     if (markerRef.current) {
-      markerRef.current.position.y = position[1] + 0.7 + Math.sin(t * 3.5) * 0.15;
+      markerRef.current.position.y = position[1] + 0.8 + Math.sin(t * 3.5) * 0.15;
       markerRef.current.rotation.y = t * 2.5;
     }
     if (ringRef.current) {
@@ -251,28 +252,49 @@ function PitWindowMarker({ position }) {
       const s = 1 + Math.sin(t * 3.5) * 0.25;
       ringRef.current.scale.set(s, s, s);
     }
+    if (beamRef.current) {
+      beamRef.current.material.opacity = 0.35 + Math.sin(t * 4) * 0.15;
+    }
   });
 
   return (
     <group position={position}>
+      {/* Ground Pulse Ring */}
       <mesh ref={ringRef} position={[0, 0.05, 0]}>
-        <ringGeometry args={[0.6, 0.85, 32]} />
-        <meshBasicMaterial color="#E10600" side={THREE.DoubleSide} transparent opacity={0.8} />
+        <ringGeometry args={[0.7, 1.05, 32]} />
+        <meshBasicMaterial color="#FF1801" side={THREE.DoubleSide} transparent opacity={0.8} />
       </mesh>
-      <mesh ref={markerRef} position={[0, 0.7, 0]}>
-        <octahedronGeometry args={[0.45, 0]} />
+
+      {/* Holographic Vertical Laser Beam */}
+      <mesh ref={beamRef} position={[0, 4, 0]}>
+        <cylinderGeometry args={[0.08, 0.3, 8, 16, 1, true]} />
+        <meshBasicMaterial color="#FF1801" transparent opacity={0.4} wireframe />
+      </mesh>
+
+      {/* Rotating Diamond Beacon */}
+      <mesh ref={markerRef} position={[0, 0.8, 0]}>
+        <octahedronGeometry args={[0.5, 0]} />
         <meshStandardMaterial
-          color="#E10600"
-          emissive="#E10600"
-          emissiveIntensity={1.5}
+          color="#FF1801"
+          emissive="#FF1801"
+          emissiveIntensity={2.0}
           roughness={0.1}
           metalness={0.9}
         />
       </mesh>
-      <pointLight color="#E10600" intensity={4.5} distance={10} position={[0, 0.8, 0]} />
+      <pointLight color="#FF1801" intensity={5} distance={12} position={[0, 1.2, 0]} />
     </group>
   );
 }
+
+function GroundCoordinateGrid() {
+  return (
+    <group position={[0, -0.6, 0]}>
+      <gridHelper args={[60, 30, '#FF1801', '#121622']} />
+    </group>
+  );
+}
+
 
 function SectorMarkers({ sectors }) {
   return (
@@ -365,6 +387,7 @@ export default function Circuit3D({
           <TelemetryCar points={activeCircuit.waypoints} onTelemetryUpdate={setCarLive} />
           <PitWindowMarker position={activeCircuit.pitStopPos} />
           <SectorMarkers sectors={activeCircuit.sectors} />
+          <GroundCoordinateGrid />
 
           <OrbitControls
             enablePan={false}
@@ -406,8 +429,72 @@ export default function Circuit3D({
             </div>
             <div className="bg-[#12151B] px-2.5 py-1 rounded-xs border border-[#1f232d]">
               <span className="text-[9px] text-neutral-500 block uppercase">TIRE WEAR</span>
-              <strong className={carLive.tireWearPct > 65 ? "text-[#E10600] text-sm" : "text-amber-400 text-sm"}>
+              <strong className={carLive.tireWearPct > 65 ? "text-[#FF1801] text-sm" : "text-amber-400 text-sm"}>
                 {carLive.tireWearPct}%
+              </strong>
+            </div>
+          </div>
+
+          {/* F1 Steering Wheel Shift Lights (15 LEDs) */}
+          <div className="flex items-center justify-between gap-0.5 mt-1 bg-black/80 px-2 py-1 rounded-xs border border-[#21242e]">
+            {[...Array(5)].map((_, i) => (
+              <span
+                key={`g-${i}`}
+                className={`w-1.5 h-1.5 rounded-full transition-all ${
+                  carLive.speedKm > 130 + i * 15
+                    ? 'bg-[#00E676] shadow-[0_0_6px_#00E676]'
+                    : 'bg-[#00E676]/20'
+                }`}
+              />
+            ))}
+            {[...Array(5)].map((_, i) => (
+              <span
+                key={`y-${i}`}
+                className={`w-1.5 h-1.5 rounded-full transition-all ${
+                  carLive.speedKm > 200 + i * 12
+                    ? 'bg-[#FFF200] shadow-[0_0_6px_#FFF200]'
+                    : 'bg-[#FFF200]/20'
+                }`}
+              />
+            ))}
+            {[...Array(3)].map((_, i) => (
+              <span
+                key={`r-${i}`}
+                className={`w-1.5 h-1.5 rounded-full transition-all ${
+                  carLive.speedKm > 255 + i * 8
+                    ? 'bg-[#FF1801] shadow-[0_0_6px_#FF1801]'
+                    : 'bg-[#FF1801]/20'
+                }`}
+              />
+            ))}
+            {[...Array(2)].map((_, i) => (
+              <span
+                key={`b-${i}`}
+                className={`w-1.5 h-1.5 rounded-full transition-all ${
+                  carLive.speedKm > 275
+                    ? 'bg-[#00D2BE] shadow-[0_0_8px_#00D2BE] animate-pulse'
+                    : 'bg-[#00D2BE]/20'
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* Lateral G-Force Friction Gauge */}
+          <div className="flex items-center gap-2.5 bg-[#12151B] px-2.5 py-1.5 rounded-xs border border-[#1f232d] mt-0.5">
+            <div className="relative w-7 h-7 rounded-full border border-neutral-600 flex items-center justify-center shrink-0 bg-black/40">
+              <div className="absolute w-full h-[0.5px] bg-neutral-700" />
+              <div className="absolute h-full w-[0.5px] bg-neutral-700" />
+              <span
+                className="absolute w-2 h-2 rounded-full bg-[#FF1801] shadow-[0_0_6px_#FF1801]"
+                style={{
+                  transform: `translate(${Math.sin((carLive.lapProgress || 0) * 0.15) * 8}px, ${Math.cos((carLive.lapProgress || 0) * 0.15) * 6}px)`
+                }}
+              />
+            </div>
+            <div>
+              <span className="text-[9px] text-neutral-500 block uppercase">LATERAL G-FORCE</span>
+              <strong className="text-white text-xs font-mono">
+                {(1.8 + Math.abs(Math.sin((carLive.lapProgress || 0) * 0.15)) * 3.2).toFixed(1)} G
               </strong>
             </div>
           </div>

@@ -1,18 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,500;0,600;0,700;1,700&family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,500;0,600;0,700;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Orbitron:wght@500;700;800;900&family=Titillium+Web:ital,wght@0,300;0,400;0,600;0,700;0,900;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
-  --f1-red: #E10600;
-  --f1-red-glow: rgba(225, 6, 0, 0.35);
-  --f1-gold: #FFD700;
+  --f1-red: #FF1801;
+  --f1-red-dark: #C40500;
+  --f1-red-glow: rgba(255, 24, 1, 0.4);
+  --f1-yellow: #FFF200;
   --f1-white: #FFFFFF;
-  --f1-dark-900: #060709;
-  --f1-dark-800: #0C0E12;
-  --f1-dark-700: #12151B;
-  --f1-dark-600: #181C24;
+  --f1-cyan: #00D2BE;
+  --f1-purple: #B026FF;
+  --f1-green: #00E676;
+  --f1-amber: #FF9100;
+  
+  --f1-bg-primary: #050608;
+  --f1-bg-surface: #0A0C11;
+  --f1-bg-card: rgba(14, 17, 24, 0.85);
+  --f1-bg-card-hover: rgba(20, 25, 36, 0.95);
   --f1-border: rgba(255, 255, 255, 0.08);
-  --f1-border-active: rgba(225, 6, 0, 0.6);
-  --f1-text-dim: #7B8292;
-  --f1-text-bright: #F0F2F6;
+  --f1-border-subtle: rgba(255, 255, 255, 0.04);
+  --f1-border-glow: rgba(255, 24, 1, 0.5);
+
+  --f1-text-bright: #F5F7FA;
+  --f1-text-base: #C3C7D4;
+  --f1-text-dim: #798196;
+  --f1-text-dark: #454B5E;
 }
 
 * {
@@ -22,54 +32,70 @@
 }
 
 body {
-  background-color: var(--f1-dark-900);
+  background-color: var(--f1-bg-primary);
   color: var(--f1-text-bright);
-  font-family: 'Space Grotesk', -apple-system, sans-serif;
+  font-family: 'Titillium Web', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   background-image: 
-    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(225, 6, 0, 0.12), transparent 75%),
-    radial-gradient(ellipse 40% 30% at 100% 100%, rgba(255, 215, 0, 0.04), transparent 60%),
-    linear-gradient(to bottom, #060709, #080A0E);
+    radial-gradient(ellipse 70% 35% at 50% 0%, rgba(255, 24, 1, 0.14), transparent 70%),
+    radial-gradient(ellipse 50% 30% at 90% 100%, rgba(0, 210, 190, 0.04), transparent 60%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.015) 25%, transparent 25%),
+    linear-gradient(225deg, rgba(255, 255, 255, 0.015) 25%, transparent 25%),
+    linear-gradient(45deg, rgba(255, 255, 255, 0.015) 25%, transparent 25%),
+    linear-gradient(315deg, rgba(255, 255, 255, 0.015) 25%, #050608 25%);
+  background-size: 100% 100%, 100% 100%, 8px 8px, 8px 8px, 8px 8px, 8px 8px;
 }
 
-/* Custom Scrollbars */
+/* Custom Telemetry Scrollbars */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #090B0E;
+  background: #080A0E;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1F232D;
+  background: #1C212D;
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #E10600;
+  background: var(--f1-red);
 }
 
-/* Fonts */
+/* Motorsport Font Classes */
 .font-f1 {
   font-family: 'Chakra Petch', sans-serif;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
+}
+
+.font-orbitron {
+  font-family: 'Orbitron', monospace;
+  letter-spacing: 0.08em;
+}
+
+.font-titillium {
+  font-family: 'Titillium Web', sans-serif;
 }
 
 .font-mono {
   font-family: 'JetBrains Mono', monospace;
-  font-feature-settings: "tnum" 1, "zero" 1;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.01em;
 }
 
-/* Glassmorphism Card System */
+/* Carbon Fiber Precision Glass Card */
 .f1-card {
-  background: linear-gradient(180deg, rgba(18, 21, 27, 0.75) 0%, rgba(12, 14, 18, 0.9) 100%);
+  background: linear-gradient(180deg, rgba(16, 20, 28, 0.82) 0%, rgba(9, 11, 16, 0.94) 100%);
   border: 1px solid var(--f1-border);
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(16px);
-  border-radius: 4px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 3px;
   position: relative;
   overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .f1-card::before {
@@ -77,74 +103,117 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-}
-
-.f1-card-active {
-  border-color: var(--f1-red);
-  box-shadow: 0 0 25px rgba(225, 6, 0, 0.25), inset 0 0 15px rgba(225, 6, 0, 0.1);
-}
-
-.f1-red-stripe {
-  position: relative;
-}
-.f1-red-stripe::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background-color: var(--f1-red);
-  box-shadow: 0 0 8px var(--f1-red);
-}
-
-/* Animations */
-@keyframes pulse-fast {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.3; transform: scale(0.85); }
-}
-
-.pulse-beacon {
-  animation: pulse-fast 1.5s infinite ease-in-out;
-}
-
-@keyframes scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(1000%); }
-}
-
-.scanline-effect {
-  position: relative;
-}
-.scanline-effect::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; height: 2px;
-  background: rgba(225, 6, 0, 0.15);
-  opacity: 0.5;
-  animation: scanline 8s linear infinite;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.18) 50%, transparent 100%);
   pointer-events: none;
 }
 
-/* Stint Track Ribbon Colors */
+.f1-card-active {
+  border-color: var(--f1-red) !important;
+  box-shadow: 0 0 25px rgba(255, 24, 1, 0.28), inset 0 0 18px rgba(255, 24, 1, 0.08);
+}
+
+.f1-card-active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--f1-red);
+  box-shadow: 0 0 10px var(--f1-red);
+}
+
+/* Glowing Telemetry Badges */
+.badge-purple {
+  background: rgba(176, 38, 255, 0.15);
+  color: #D67AFF;
+  border: 1px solid rgba(176, 38, 255, 0.5);
+  box-shadow: 0 0 10px rgba(176, 38, 255, 0.25);
+}
+
+.badge-green {
+  background: rgba(0, 230, 118, 0.15);
+  color: #00E676;
+  border: 1px solid rgba(0, 230, 118, 0.5);
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.25);
+}
+
+.badge-yellow {
+  background: rgba(255, 242, 0, 0.15);
+  color: #FFF200;
+  border: 1px solid rgba(255, 242, 0, 0.5);
+}
+
+/* Pirelli Compound Visual Tags */
 .tire-badge-soft {
-  background: rgba(225, 6, 0, 0.15);
-  color: #FF4D4D;
-  border: 1px solid rgba(225, 6, 0, 0.4);
+  background: rgba(255, 24, 1, 0.18);
+  color: #FF2B16;
+  border: 1px solid rgba(255, 24, 1, 0.5);
+  box-shadow: 0 0 8px rgba(255, 24, 1, 0.3);
 }
+
 .tire-badge-medium {
-  background: rgba(255, 215, 0, 0.15);
-  color: #FFD700;
-  border: 1px solid rgba(255, 215, 0, 0.4);
+  background: rgba(255, 242, 0, 0.16);
+  color: #FFF200;
+  border: 1px solid rgba(255, 242, 0, 0.5);
+  box-shadow: 0 0 8px rgba(255, 242, 0, 0.3);
 }
+
 .tire-badge-hard {
   background: rgba(255, 255, 255, 0.15);
   color: #FFFFFF;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
 }
+
+/* Flashing Beacon Animations */
+@keyframes sc-flash {
+  0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 8px #FF9100); }
+  50% { opacity: 0.35; transform: scale(0.92); filter: drop-shadow(0 0 2px #FF9100); }
+}
+
+.animate-sc-beacon {
+  animation: sc-flash 1s infinite ease-in-out;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px #00E676; }
+  50% { opacity: 0.4; box-shadow: 0 0 2px #00E676; }
+}
+
+.animate-live-green {
+  animation: live-pulse 1.8s infinite ease-in-out;
+}
+
+/* Sliders */
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #141722;
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--f1-red);
+  cursor: pointer;
+  box-shadow: 0 0 8px var(--f1-red-glow);
+  border: 1px solid #fff;
+  transition: transform 0.1s;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
 
 /* Utilities */
 .min-h-screen { min-height: 100vh; }

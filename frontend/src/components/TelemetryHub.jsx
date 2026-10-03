@@ -126,6 +126,28 @@ export default function TelemetryHub({
     return data;
   }, [strategies, models, trackMeta]);
 
+  // Best on average vs safest / lowest variance
+  const bestOnAverage = strategies[0];
+  const safestStrategy = React.useMemo(() => {
+    if (!strategies.length) return null;
+    return [...strategies].sort((a, b) => a.iqr - b.iqr)[0];
+  }, [strategies]);
+
+  // Fitted regression line points for overlay
+  const regressionLines = React.useMemo(() => {
+    const lines = {};
+    ['SOFT', 'MEDIUM', 'HARD'].forEach(comp => {
+      const m = models[comp];
+      if (m) {
+        lines[comp] = [
+          { tyre_life: 1, lap_time: Number((m.intercept + m.slope * 1).toFixed(3)) },
+          { tyre_life: comp === 'SOFT' ? 24 : comp === 'MEDIUM' ? 36 : 46, lap_time: Number((m.intercept + m.slope * (comp === 'SOFT' ? 24 : comp === 'MEDIUM' ? 36 : 46)).toFixed(3)) }
+        ];
+      }
+    });
+    return lines;
+  }, [models]);
+
   return (
     <div className="flex flex-col gap-6">
       {/* Sub-navigation Controls */}
@@ -142,7 +164,7 @@ export default function TelemetryHub({
               onClick={() => setActiveSubTab(tab.id)}
               className={`px-3.5 py-1.5 font-mono text-xs font-bold uppercase transition-all rounded-xs cursor-pointer ${
                 activeSubTab === tab.id
-                  ? 'bg-[#E10600] text-black font-extrabold shadow-sm'
+                  ? 'bg-[#FF1801] text-black font-extrabold shadow-sm'
                   : 'bg-[#0E1015] border border-[#212530] text-neutral-400 hover:text-white hover:border-[#383d4c]'
               }`}
             >
@@ -153,16 +175,58 @@ export default function TelemetryHub({
 
         <div className="flex items-center gap-3 text-xs font-mono text-neutral-400">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" /> SIMULATION N=1,000
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> SIMULATION N=1,000
           </span>
           <span className="text-neutral-600">|</span>
-          <span>FUEL BIAS: -{trackMeta.fuel_burn_rate}s/lap</span>
+          <span>FUEL MASS BIAS: -{trackMeta.fuel_burn_rate}s/lap</span>
         </div>
       </div>
 
       {/* VIEW 1: STRATEGY DECK (Gantt + Ranked Table + Delta Bars) */}
       {activeSubTab === 'STRATEGY_DECK' && (
         <div className="flex flex-col gap-6">
+          {/* Tactical Divergence Callout Banner (Best Average vs Safest) */}
+          {bestOnAverage && safestStrategy && (
+            bestOnAverage.rank !== safestStrategy.rank ? (
+              <div className="bg-[#141208] border-l-4 border-l-[#FF9100] border border-[#2e2612] p-4 rounded-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-[#FF9100]/20 flex items-center justify-center text-[#FF9100] shrink-0">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-f1 text-white font-bold text-sm tracking-wide">
+                      TACTICAL DIVERGENCE: OPTIMAL EXPECTED FINISH vs. MINIMUM VARIANCE
+                    </div>
+                    <div className="text-xs font-mono text-neutral-300 mt-0.5">
+                      <strong className="text-white">#{bestOnAverage.rank} {bestOnAverage.name}</strong> achieves the fastest mean race time ({bestOnAverage.formatted_mean}), but <strong className="text-amber-400">#{safestStrategy.rank} {safestStrategy.name}</strong> provides lower strategic risk (IQR &plusmn;{(safestStrategy.iqr / 2).toFixed(1)}s vs &plusmn;{(bestOnAverage.iqr / 2).toFixed(1)}s).
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => onSelectRank(bestOnAverage.rank)}
+                    className="px-3 py-1.5 font-mono text-xs font-bold bg-[#FF1801] text-black uppercase rounded-xs cursor-pointer hover:bg-white"
+                  >
+                    Select #1 Optimal Mean
+                  </button>
+                  <button
+                    onClick={() => onSelectRank(safestStrategy.rank)}
+                    className="px-3 py-1.5 font-mono text-xs font-bold bg-[#FF9100] text-black uppercase rounded-xs cursor-pointer hover:bg-white"
+                  >
+                    Select #{safestStrategy.rank} Safest
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-[#08140E] border-l-4 border-l-[#00E676] border border-[#162e20] p-3.5 rounded-xs flex items-center gap-3 shadow-lg">
+                <CheckCircle2 className="w-5 h-5 text-[#00E676] shrink-0" />
+                <div className="text-xs font-mono text-neutral-300">
+                  <strong className="text-[#00E676] font-bold">TACTICAL CONSENSUS:</strong> Strategy #{bestOnAverage.rank} ({bestOnAverage.name}) dominates both criteria—fastest expected finish ({bestOnAverage.formatted_mean}) and tightest risk profile (IQR &plusmn;{(bestOnAverage.iqr / 2).toFixed(1)}s).
+                </div>
+              </div>
+            )
+          )}
+
           {/* Visual Stint Gantt Timeline */}
           <div className="f1-card p-5 flex flex-col gap-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#21242e] pb-3 gap-2">
@@ -175,8 +239,8 @@ export default function TelemetryHub({
                 </p>
               </div>
               <div className="flex items-center gap-3 text-xs font-mono">
-                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#E10600]" /> SOFT</span>
-                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#FFD700]" /> MEDIUM</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#FF1801]" /> SOFT</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#FFF200]" /> MEDIUM</span>
                 <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-white" /> HARD</span>
               </div>
             </div>
@@ -193,13 +257,13 @@ export default function TelemetryHub({
                     onClick={() => onSelectRank(strat.rank)}
                     className={`flex items-center p-2 rounded-xs border transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-[#181C25] border-[#E10600] shadow-md'
+                        ? 'bg-[#181C25] border-[#FF1801] shadow-md'
                         : 'bg-[#0B0D12] border-[#1c1f28] hover:border-[#383d4c]'
                     }`}
                   >
                     <div className="w-44 flex items-center gap-2.5 shrink-0">
                       <span className={`w-6 h-6 flex items-center justify-center font-mono font-bold text-xs rounded-xs ${
-                        isP1 ? 'bg-[#E10600] text-black font-extrabold' : 'bg-[#181A22] text-neutral-300'
+                        isP1 ? 'bg-[#FF1801] text-black font-extrabold' : 'bg-[#181A22] text-neutral-300'
                       }`}>
                         #{strat.rank}
                       </span>
@@ -433,14 +497,26 @@ export default function TelemetryHub({
                   <Tooltip content={<CustomScatterTooltip />} />
                   <Legend wrapperStyle={{ fontFamily: 'Chakra Petch', textTransform: 'uppercase', fontSize: 12 }} />
 
+                  {/* Scatter Points */}
                   {(compoundFilter === 'ALL' || compoundFilter === 'SOFT') && (
-                    <Scatter name="SOFT Laps" data={filteredScatter.filter(p => p.compound === 'SOFT')} fill="#E10600" opacity={0.7} />
+                    <Scatter name="SOFT Telemetry" data={filteredScatter.filter(p => p.compound === 'SOFT')} fill="#FF1801" opacity={0.65} />
                   )}
                   {(compoundFilter === 'ALL' || compoundFilter === 'MEDIUM') && (
-                    <Scatter name="MEDIUM Laps" data={filteredScatter.filter(p => p.compound === 'MEDIUM')} fill="#FFD700" opacity={0.7} />
+                    <Scatter name="MEDIUM Telemetry" data={filteredScatter.filter(p => p.compound === 'MEDIUM')} fill="#FFF200" opacity={0.65} />
                   )}
                   {(compoundFilter === 'ALL' || compoundFilter === 'HARD') && (
-                    <Scatter name="HARD Laps" data={filteredScatter.filter(p => p.compound === 'HARD')} fill="#FFFFFF" opacity={0.75} />
+                    <Scatter name="HARD Telemetry" data={filteredScatter.filter(p => p.compound === 'HARD')} fill="#FFFFFF" opacity={0.7} />
+                  )}
+
+                  {/* Huber Regression Fitted Curves */}
+                  {(compoundFilter === 'ALL' || compoundFilter === 'SOFT') && regressionLines.SOFT && (
+                    <Scatter name="SOFT Model (Huber)" data={regressionLines.SOFT} line={{ stroke: '#FF1801', strokeWidth: 2.5 }} shape={() => null} />
+                  )}
+                  {(compoundFilter === 'ALL' || compoundFilter === 'MEDIUM') && regressionLines.MEDIUM && (
+                    <Scatter name="MEDIUM Model (Huber)" data={regressionLines.MEDIUM} line={{ stroke: '#FFF200', strokeWidth: 2.5 }} shape={() => null} />
+                  )}
+                  {(compoundFilter === 'ALL' || compoundFilter === 'HARD') && regressionLines.HARD && (
+                    <Scatter name="HARD Model (Huber)" data={regressionLines.HARD} line={{ stroke: '#FFFFFF', strokeWidth: 2.5 }} shape={() => null} />
                   )}
                 </ScatterChart>
               </ResponsiveContainer>
