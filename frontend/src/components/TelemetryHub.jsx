@@ -67,10 +67,18 @@ export default function TelemetryHub({
   simData,
   valData,
   selectedRank,
-  onSelectRank
+  onSelectRank,
+  initialView = null,
+  hideNav = false
 }) {
-  const [activeSubTab, setActiveSubTab] = useState('STRATEGY_DECK'); // 'STRATEGY_DECK', 'TIRE_SIGNAL', 'GAP_DELTA', 'VALIDATION'
+  const [activeSubTab, setActiveSubTab] = useState(initialView || 'STRATEGY_DECK');
   const [compoundFilter, setCompoundFilter] = useState('ALL');
+
+  React.useEffect(() => {
+    if (initialView) {
+      setActiveSubTab(initialView);
+    }
+  }, [initialView]);
 
   const strategies = simData?.strategies || [];
   const models = degData?.models || {};
@@ -151,32 +159,34 @@ export default function TelemetryHub({
   return (
     <div className="flex flex-col gap-6">
       {/* Sub-navigation Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.1] pb-3">
-        <div className="flex flex-wrap items-center gap-2">
-          {[
-            { id: 'STRATEGY_DECK', label: '1. MONTE CARLO STRATEGY DECK' },
-            { id: 'TIRE_SIGNAL', label: '2. HUBER TIRE WEAR REGRESSION' },
-            { id: 'GAP_DELTA', label: '3. CUMULATIVE GAP DELTA TO P1' },
-            { id: 'VALIDATION', label: '4. FIA GROUND-TRUTH BENCHMARK' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveSubTab(tab.id)}
-              className={`f1-hub-tab-btn ${activeSubTab === tab.id ? 'f1-hub-tab-btn-active' : ''}`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      {!hideNav && (
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.1] pb-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              { id: 'STRATEGY_DECK', label: '1. MONTE CARLO STRATEGY DECK' },
+              { id: 'TIRE_SIGNAL', label: '2. HUBER TIRE WEAR REGRESSION' },
+              { id: 'GAP_DELTA', label: '3. CUMULATIVE GAP DELTA TO P1' },
+              { id: 'VALIDATION', label: '4. FIA GROUND-TRUTH BENCHMARK' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveSubTab(tab.id)}
+                className={`f1-hub-tab-btn ${activeSubTab === tab.id ? 'f1-hub-tab-btn-active' : ''}`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-        <div className="flex items-center gap-3 text-xs font-mono text-neutral-300">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" /> SOLVER N=1,000 ITERATIONS
-          </span>
-          <span className="text-neutral-600">|</span>
-          <span>FUEL MASS NORMALIZATION: -{trackMeta.fuel_burn_rate}s/LAP</span>
+          <div className="flex items-center gap-3 text-xs font-mono text-neutral-300">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" /> SOLVER N=1,000 ITERATIONS
+            </span>
+            <span className="text-neutral-600">|</span>
+            <span>FUEL MASS NORMALIZATION: -{trackMeta.fuel_burn_rate}s/LAP</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* VIEW 1: STRATEGY DECK (Gantt + Ranked Table + Delta Bars) */}
       {activeSubTab === 'STRATEGY_DECK' && (
