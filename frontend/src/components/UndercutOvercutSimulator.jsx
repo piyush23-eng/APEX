@@ -79,7 +79,7 @@ export default function UndercutOvercutSimulator({ trackMeta, degData }) {
             ? 'bg-[#00E676]/20 border-[#00E676] text-[#00E676] shadow-[0_0_10px_rgba(0,230,118,0.3)]'
             : 'bg-[#FF9100]/20 border-[#FF9100] text-[#FF9100] shadow-[0_0_10px_rgba(255,145,0,0.3)]'
         }`}>
-          {simulation.isUndercutViable ? 'UNDERCUT PROFILE OPTIMAL' : 'OVERCUT / EXTEND RECOMMENDED'}
+          {simulation.isUndercutViable ? 'TACTICAL CALL: TRIGGER UNDERCUT' : 'TACTICAL CALL: MAINTAIN STINT (OVERCUT)'}
         </span>
       </div>
 
@@ -89,7 +89,7 @@ export default function UndercutOvercutSimulator({ trackMeta, degData }) {
         <div className="space-y-4 bg-[#080A0E] p-4 rounded-xs border border-white/[0.08] font-mono text-xs">
           <div>
             <div className="flex justify-between text-neutral-400 mb-1">
-              <span>CURRENT ON-TRACK GAP</span>
+              <span>ON-TRACK GAP DELTA (T_DEFICIT)</span>
               <strong className="text-white text-sm">{trackGap.toFixed(1)}s</strong>
             </div>
             <input
@@ -101,12 +101,12 @@ export default function UndercutOvercutSimulator({ trackMeta, degData }) {
               onChange={(e) => setTrackGap(parseFloat(e.target.value))}
               className="w-full"
             />
-            <span className="text-[9px] text-neutral-500">Time deficit behind car ahead</span>
+            <span className="text-[9px] text-neutral-500">Delta to leading rival car on circuit</span>
           </div>
 
           <div>
             <div className="flex justify-between text-neutral-400 mb-1">
-              <span>LEADER TIRE AGE</span>
+              <span>RIVAL TIRE AGE</span>
               <strong className="text-amber-400 text-sm">{leaderTireAge} Laps</strong>
             </div>
             <input
@@ -118,12 +118,12 @@ export default function UndercutOvercutSimulator({ trackMeta, degData }) {
               onChange={(e) => setLeaderTireAge(parseInt(e.target.value))}
               className="w-full"
             />
-            <span className="text-[9px] text-neutral-500">Current degradation: +{simulation.leaderCurrentDeg}s/lap</span>
+            <span className="text-[9px] text-neutral-500">Current degradation penalty: +{simulation.leaderCurrentDeg}s/lap</span>
           </div>
 
           <div>
             <div className="flex justify-between text-neutral-400 mb-1">
-              <span>OUT-LAP WARMUP ADVANTAGE</span>
+              <span>FRESH RUBBER OUT-LAP DELTA (&Delta;t)</span>
               <strong className="text-[#00E676] text-sm">+{outlapAdvantage.toFixed(1)}s</strong>
             </div>
             <input
@@ -135,12 +135,12 @@ export default function UndercutOvercutSimulator({ trackMeta, degData }) {
               onChange={(e) => setOutlapAdvantage(parseFloat(e.target.value))}
               className="w-full"
             />
-            <span className="text-[9px] text-neutral-500">Thermal grip delta on fresh rubber</span>
+            <span className="text-[9px] text-neutral-500">Peak operating thermal grip differential</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/[0.06]">
             <div>
-              <span className="text-[9px] text-neutral-500 block uppercase mb-1">LEADER COMPOUND</span>
+              <span className="text-[9px] text-neutral-500 block uppercase mb-1">RIVAL COMPOUND</span>
               <select
                 value={leaderCompound}
                 onChange={(e) => setLeaderCompound(e.target.value)}
@@ -152,7 +152,7 @@ export default function UndercutOvercutSimulator({ trackMeta, degData }) {
               </select>
             </div>
             <div>
-              <span className="text-[9px] text-neutral-500 block uppercase mb-1">CHASER TARGET</span>
+              <span className="text-[9px] text-neutral-500 block uppercase mb-1">OUR BOX COMPOUND</span>
               <select
                 value={chaserTargetCompound}
                 onChange={(e) => setChaserTargetCompound(e.target.value)}
@@ -171,7 +171,7 @@ export default function UndercutOvercutSimulator({ trackMeta, degData }) {
           <div>
             <div className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider mb-2 font-bold flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-[#FF1801]" />
-              PREDICTED TRACK POSITION CROSSOVER
+              TELEMETRY PIT CROSSOVER DELTA PROJECTION
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono mb-4">
@@ -180,23 +180,23 @@ export default function UndercutOvercutSimulator({ trackMeta, degData }) {
                 <strong className="text-2xl font-bold text-[#00E676] mt-0.5 block">
                   +{simulation.deltaGainedPerLap}s
                 </strong>
-                <span className="text-[9px] text-neutral-400">Total pace differential</span>
+                <span className="text-[9px] text-neutral-400">Immediate delta on out-lap</span>
               </div>
 
               <div className="bg-[#10141D] p-3 rounded-xs border border-white/[0.06]">
-                <span className="text-[9px] text-neutral-500 uppercase block">POST-STOP GAP (LAP +1)</span>
+                <span className="text-[9px] text-neutral-500 uppercase block">PROJECTED EXIT DELTA (LAP +1)</span>
                 <strong className={`text-2xl font-bold mt-0.5 block ${simulation.netGapAfter1Lap <= 0 ? 'text-[#00E676]' : 'text-neutral-200'}`}>
                   {simulation.netGapAfter1Lap <= 0 ? `${Math.abs(simulation.netGapAfter1Lap)}s AHEAD` : `+${simulation.netGapAfter1Lap}s BEHIND`}
                 </strong>
-                <span className="text-[9px] text-neutral-400">Immediate out-lap exit</span>
+                <span className="text-[9px] text-neutral-400">Net track position post pit exit</span>
               </div>
 
               <div className="bg-[#10141D] p-3 rounded-xs border border-white/[0.06]">
-                <span className="text-[9px] text-neutral-500 uppercase block">POST-STOP GAP (LAP +2)</span>
+                <span className="text-[9px] text-neutral-500 uppercase block">RIVAL RESPONSE DELTA (LAP +2)</span>
                 <strong className={`text-2xl font-bold mt-0.5 block ${simulation.netGapAfter2Laps <= 0 ? 'text-[#00E676]' : 'text-amber-400'}`}>
                   {simulation.netGapAfter2Laps <= 0 ? `${Math.abs(simulation.netGapAfter2Laps)}s AHEAD` : `+${simulation.netGapAfter2Laps}s BEHIND`}
                 </strong>
-                <span className="text-[9px] text-neutral-400">After leader in-lap response</span>
+                <span className="text-[9px] text-neutral-400">Net track position after rival in-lap</span>
               </div>
             </div>
 
@@ -204,19 +204,19 @@ export default function UndercutOvercutSimulator({ trackMeta, degData }) {
             <div className="p-3 bg-[#0D111A] border-l-2 border-[#FF1801] rounded-xs font-mono text-xs text-neutral-300 leading-relaxed">
               {simulation.isUndercutViable ? (
                 <span>
-                  <strong className="text-[#00E676]">STRATEGY RECOMMENDATION: BOX NOW (UNDERCUT).</strong> Pitting immediately will erase the {trackGap}s deficit via the +{simulation.deltaGainedPerLap}s delta advantage on fresh rubber. When the leader responds on the following lap, you will emerge approximately {Math.abs(simulation.netGapAfter2Laps)}s ahead in net track position.
+                  <strong className="text-[#00E676]">RADIO / PIT-WALL CALL: BOX THIS LAP (TRIGGER UNDERCUT).</strong> Executing stop erases current {trackGap}s on-track deficit via +{simulation.deltaGainedPerLap}s fresh-rubber out-lap delta. Estimated delta at rival pit release: +{Math.abs(simulation.netGapAfter2Laps)}s in clean air.
                 </span>
               ) : (
                 <span>
-                  <strong className="text-amber-400">STRATEGY RECOMMENDATION: EXTEND STINT (OVERCUT).</strong> The current gap of {trackGap}s exceeds the out-lap delta potential (+{simulation.deltaGainedPerLap}s). Pitting now risks releasing you into dirty air behind traffic. Stay out and wait for a Safety Car window or traffic ahead of the leader.
+                  <strong className="text-amber-400">RADIO / PIT-WALL CALL: NEGATIVE BOX, STAY OUT (EXECUTE OVERCUT).</strong> Current deficit ({trackGap}s) exceeds available out-lap delta (+{simulation.deltaGainedPerLap}s). Pitting now risks releasing into dirty air traffic wake. Extend stint to exploit SC deployment window or tire degradation cliff crossover.
                 </span>
               )}
             </div>
           </div>
 
           <div className="pt-3 border-t border-white/[0.06] text-[10px] font-mono text-neutral-500 flex justify-between">
-            <span>PIT TRANSIT PENALTY: {pitTransitLoss}s</span>
-            <span>MODEL: FASTF1 TIRE DELTA + TRAFFIC RELEASE MATRIX</span>
+            <span>PIT TRANSIT SPEED LIMITER PENALTY: {pitTransitLoss}s</span>
+            <span>ENGINEERING LOGIC: 10Hz FASTF1 DEGRADATION FIT + PIT LIMITER DELTA</span>
           </div>
         </div>
       </div>

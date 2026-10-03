@@ -53,8 +53,8 @@ const CustomScatterTooltip = ({ active, payload }) => {
           <span className="text-neutral-500">#{d.driver}</span>
         </div>
         <div className="text-neutral-300">Stint Age: <strong className="text-white">{d.tyre_life} Laps</strong></div>
-        <div className="text-neutral-300">Normalized Pace: <strong className="text-white">{d.lap_time.toFixed(3)}s</strong></div>
-        <div className="text-[10px] text-neutral-500">FastF1 Lap #{d.lap_number}</div>
+        <div className="text-neutral-300">Fuel-Corrected Pace: <strong className="text-white">{d.lap_time.toFixed(3)}s</strong></div>
+        <div className="text-[10px] text-neutral-400">FastF1 CAN-Bus Lap #{d.lap_number}</div>
       </div>
     );
   }
@@ -163,10 +163,10 @@ export default function TelemetryHub({
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.1] pb-3">
           <div className="flex flex-wrap items-center gap-2">
             {[
-              { id: 'STRATEGY_DECK', label: '1. MONTE CARLO STRATEGY DECK' },
-              { id: 'TIRE_SIGNAL', label: '2. HUBER TIRE WEAR REGRESSION' },
-              { id: 'GAP_DELTA', label: '3. CUMULATIVE GAP DELTA TO P1' },
-              { id: 'VALIDATION', label: '4. FIA GROUND-TRUTH BENCHMARK' }
+              { id: 'STRATEGY_DECK', label: '1. MONTE CARLO RACE STRATEGY SOLVER' },
+              { id: 'TIRE_SIGNAL', label: '2. HUBER LOSS TIRE DEGRADATION REGRESSION' },
+              { id: 'GAP_DELTA', label: '3. CUMULATIVE RACE TIME GAP DELTA TO P1' },
+              { id: 'VALIDATION', label: '4. FIA OFFICIAL RACE GROUND-TRUTH VALIDATION' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -180,10 +180,10 @@ export default function TelemetryHub({
 
           <div className="flex items-center gap-3 text-xs font-mono text-neutral-300">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" /> SOLVER N=1,000 ITERATIONS
+              <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" /> VECTORIZED SOLVER: N=1,000 RUNS
             </span>
             <span className="text-neutral-600">|</span>
-            <span>FUEL MASS NORMALIZATION: -{trackMeta.fuel_burn_rate}s/LAP</span>
+            <span>DYNAMIC FUEL MASS CORRECTION: -{trackMeta.fuel_burn_rate}s/LAP</span>
           </div>
         </div>
       )}
@@ -201,10 +201,10 @@ export default function TelemetryHub({
                   </div>
                   <div>
                     <div className="font-f1 text-white font-bold text-sm tracking-wide">
-                      TACTICAL DIVERGENCE: OPTIMAL EXPECTED FINISH vs. MINIMUM VARIANCE
+                      TACTICAL DIVERGENCE: OPTIMAL EXPECTED FINISH (E[T]) vs. MINIMUM VARIANCE (IQR)
                     </div>
                     <div className="text-xs font-mono text-neutral-300 mt-0.5">
-                      <strong className="text-white">#{bestOnAverage.rank} {bestOnAverage.name}</strong> achieves the fastest mean race time ({bestOnAverage.formatted_mean}), but <strong className="text-amber-400">#{safestStrategy.rank} {safestStrategy.name}</strong> provides lower strategic risk (IQR &plusmn;{(safestStrategy.iqr / 2).toFixed(1)}s vs &plusmn;{(bestOnAverage.iqr / 2).toFixed(1)}s).
+                      <strong className="text-white">#{bestOnAverage.rank} {bestOnAverage.name}</strong> achieves the fastest mean race time ({bestOnAverage.formatted_mean}), but <strong className="text-amber-400">#{safestStrategy.rank} {safestStrategy.name}</strong> provides tighter stochastic risk bounds (IQR &plusmn;{(safestStrategy.iqr / 2).toFixed(1)}s vs &plusmn;{(bestOnAverage.iqr / 2).toFixed(1)}s).
                     </div>
                   </div>
                 </div>
@@ -219,7 +219,7 @@ export default function TelemetryHub({
                     onClick={() => onSelectRank(safestStrategy.rank)}
                     className="px-3 py-1.5 font-mono text-xs font-bold bg-[#FF9100] text-black uppercase rounded-xs cursor-pointer hover:bg-white"
                   >
-                    Select #{safestStrategy.rank} Safest
+                    Select #{safestStrategy.rank} Min Variance
                   </button>
                 </div>
               </div>
@@ -227,7 +227,7 @@ export default function TelemetryHub({
               <div className="bg-[#08140E] border-l-4 border-l-[#00E676] border border-[#162e20] p-3.5 rounded-xs flex items-center gap-3 shadow-lg">
                 <CheckCircle2 className="w-5 h-5 text-[#00E676] shrink-0" />
                 <div className="text-xs font-mono text-neutral-300">
-                  <strong className="text-[#00E676] font-bold">TACTICAL CONSENSUS:</strong> Strategy #{bestOnAverage.rank} ({bestOnAverage.name}) dominates both criteria—fastest expected finish ({bestOnAverage.formatted_mean}) and tightest risk profile (IQR &plusmn;{(bestOnAverage.iqr / 2).toFixed(1)}s).
+                  <strong className="text-[#00E676] font-bold">TACTICAL CONSENSUS:</strong> Candidate #{bestOnAverage.rank} ({bestOnAverage.name}) dominates Pareto frontier—fastest expected finish ({bestOnAverage.formatted_mean}) and lowest stochastic variance (IQR &plusmn;{(bestOnAverage.iqr / 2).toFixed(1)}s).
                 </div>
               </div>
             )
@@ -238,10 +238,10 @@ export default function TelemetryHub({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.1] pb-3 gap-2">
               <div>
                 <h3 className="font-f1 text-lg font-bold text-white tracking-wider uppercase">
-                  STINT TRAJECTORY &amp; MANDATORY PIT WINDOW TIMELINE
+                  STINT TRAJECTORY &amp; MANDATORY TIRE REGULATION TIMELINE
                 </h3>
                 <p className="text-xs font-mono text-neutral-300 mt-1">
-                  Compound life duration, tire cliff cross-over points, and strategic box windows across all 10 candidate strategies
+                  Compound stint duration, tire cliff boundaries, and optimal pit entry windows across all 10 candidate strategies
                 </p>
               </div>
               <div className="flex items-center gap-3 text-xs font-mono">
@@ -385,15 +385,15 @@ export default function TelemetryHub({
                   {/* Quantitative Stats Bar */}
                   <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#1a1d25] font-mono text-xs">
                     <div>
-                      <div className="text-[10px] text-neutral-500">EXPECTED FINISH</div>
+                      <div className="text-[10px] text-neutral-400">EXPECTED FINISH (E[T])</div>
                       <div className="text-white font-bold text-sm mt-0.5">{strat.formatted_mean}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] text-neutral-500">IQR SPREAD</div>
+                      <div className="text-[10px] text-neutral-400">IQR DISPERSION (Q3-Q1)</div>
                       <div className="text-neutral-300 font-medium mt-0.5">&plusmn;{(strat.iqr / 2).toFixed(1)}s</div>
                     </div>
                     <div>
-                      <div className="text-[10px] text-neutral-500">SC BENEFIT PROB</div>
+                      <div className="text-[10px] text-neutral-400">P(SAFETY CAR BONUS)</div>
                       <div className="text-amber-400 font-bold mt-0.5">{(strat.sc_benefit_prob * 100).toFixed(0)}%</div>
                     </div>
                   </div>
@@ -423,24 +423,24 @@ export default function TelemetryHub({
                       <span className="font-f1 text-base font-bold text-white tracking-wider">{comp}</span>
                     </div>
                     <span className="text-[10px] font-mono px-2 py-0.5 bg-[#181B22] text-neutral-300 border border-[#252934]">
-                      N={m.sample_size} VALID LAPS
+                      N={m.sample_size} VALID TELEMETRY LAPS
                     </span>
                   </div>
                   <div className="flex items-baseline justify-between font-mono">
                     <div>
-                      <div className="text-[10px] text-neutral-500 uppercase">DEGRADATION RATE (&alpha;)</div>
+                      <div className="text-[10px] text-neutral-400 uppercase">EMPIRICAL DEGRADATION RATE (&alpha;_deg)</div>
                       <div className="text-2xl font-bold text-white mt-0.5">
                         +{m.slope.toFixed(4)}<span className="text-xs text-neutral-400">s/lap</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-[10px] text-neutral-500 uppercase">FIT SCORE (R&sup2;)</div>
+                      <div className="text-[10px] text-neutral-400 uppercase">COEFFICIENT OF DETERMINATION (R&sup2;)</div>
                       <div className="text-xl font-bold text-neutral-200 mt-0.5">{m.r2.toFixed(3)}</div>
                     </div>
                   </div>
                   <div className="text-[10px] font-mono text-neutral-400 mt-2 pt-1 border-t border-[#181b22] flex justify-between">
-                    <span>Base Pace: {m.intercept.toFixed(2)}s</span>
-                    <span className="text-emerald-400 font-semibold">Fuel Corrected</span>
+                    <span>Fresh Base Pace (&beta;0): {m.intercept.toFixed(2)}s</span>
+                    <span className="text-emerald-400 font-semibold">Fuel Mass Corrected (-{trackMeta.fuel_burn_rate}s/L)</span>
                   </div>
                 </div>
               );
@@ -452,10 +452,10 @@ export default function TelemetryHub({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.1] pb-3 gap-2">
               <div>
                 <h3 className="font-f1 text-lg font-bold text-white tracking-wider uppercase">
-                  FASTF1 EMPIRICAL TIRE WEAR SIGNAL VS. HUBER M-ESTIMATOR FIT
+                  FASTF1 EMPIRICAL TIRE WEAR TELEMETRY VS. HUBER LOSS M-ESTIMATOR FIT
                 </h3>
                 <p className="text-xs font-mono text-neutral-300 mt-1">
-                  Fuel-mass-corrected lap times as a function of stint age. Outliers (&gt;2.5s) and safety car laps filtered via robust Huber loss regression.
+                  Fuel-mass-corrected lap times as a function of stint age. Outliers (&gt;2.5s), yellow-flag sectors, and VSC anomalies filtered using robust Huber loss M-estimation (&delta;=1.345).
                 </p>
               </div>
 
@@ -532,10 +532,10 @@ export default function TelemetryHub({
         <div className="f1-card p-5 flex flex-col gap-4">
           <div className="border-b border-white/[0.1] pb-3">
             <h3 className="font-f1 text-lg font-bold text-white tracking-wider uppercase">
-              CUMULATIVE GAP DELTA RELATIVE TO P1 ({strategies[0]?.name})
+              CUMULATIVE RACE TIME GAP DELTA RELATIVE TO OPTIMAL BENCHMARK P1
             </h3>
             <p className="text-xs font-mono text-neutral-300 mt-1">
-              Lap-by-lap cumulative race time differential. Negative values denote on-track leads; positive values denote time deficits.
+              Lap-by-lap cumulative race time differential relative to P1. Negative values indicate on-track lead; positive values indicate cumulative time deficit.
             </p>
           </div>
 
@@ -552,9 +552,9 @@ export default function TelemetryHub({
                       return (
                         <div className="bg-[#0c0e14] border border-[#262a36] p-2.5 font-mono text-xs shadow-2xl rounded-xs">
                           <div className="font-bold text-white mb-1">LAP #{label}</div>
-                          <div className="text-emerald-400">P1 Baseline: 0.00s</div>
-                          <div className="text-blue-400">P2 Gap: +{payload[0]?.value}s</div>
-                          <div className="text-amber-400">2-Stop Gap: +{payload[1]?.value}s</div>
+                          <div className="text-emerald-400">P1 Benchmark: 0.00s</div>
+                          <div className="text-blue-400">P2 Contender Gap: +{payload[0]?.value}s</div>
+                          <div className="text-amber-400">2-Stop Alternate Gap: +{payload[1]?.value}s</div>
                         </div>
                       );
                     }
@@ -594,7 +594,7 @@ export default function TelemetryHub({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-[#090C12] border border-white/[0.1] p-4 rounded-xs">
-              <div className="text-[10px] font-mono text-neutral-400 uppercase mb-1 font-bold">ACTUAL RACE WINNER (GROUND TRUTH)</div>
+              <div className="text-[10px] font-mono text-neutral-400 uppercase mb-1 font-bold">FIA OFFICIAL RACE WINNER (EMPIRICAL GROUND TRUTH)</div>
               <div className="font-f1 text-2xl font-bold text-white mb-2">{valData.winner.driver} &bull; {valData.winner.team}</div>
               <div className="flex items-center gap-2 mb-2">
                 {valData.winner.stints.map((st, i) => (
@@ -603,20 +603,20 @@ export default function TelemetryHub({
                   </span>
                 ))}
               </div>
-              <div className="text-xs font-mono text-neutral-300">Actual Pit Lap: <strong className="text-white">{valData.winner.pit_laps.join(', ') || 'None'}</strong></div>
+              <div className="text-xs font-mono text-neutral-300">Official Race Pit Lap: <strong className="text-white">{valData.winner.pit_laps.join(', ') || 'None'}</strong></div>
             </div>
 
             <div className="bg-[#090C12] border border-white/[0.1] p-4 rounded-xs">
-              <div className="text-[10px] font-mono text-neutral-400 uppercase mb-1 font-bold">SOLVER TOP-RANKED MATCH</div>
+              <div className="text-[10px] font-mono text-neutral-400 uppercase mb-1 font-bold">SOLVER CANDIDATE ALIGNMENT</div>
               <div className="font-f1 text-xl font-bold text-[#FF1801] mb-2">{valData.model_match.matched_strategy_name}</div>
-              <div className="text-xs font-mono text-neutral-300 mb-2">Pit Offset: <strong className="text-white">{valData.model_match.pit_error_laps} Laps Delta</strong></div>
-              <div className="text-xs font-mono text-[#00E676] font-bold">Solver Calibration Match: Rank #{valData.model_match.rank} of 10 Candidates</div>
+              <div className="text-xs font-mono text-neutral-300 mb-2">Pit Window Discrepancy: <strong className="text-white">{valData.model_match.pit_error_laps} Laps Delta</strong></div>
+              <div className="text-xs font-mono text-[#00E676] font-bold">Calibration Accuracy: Rank #{valData.model_match.rank} of 10 Candidates on Pareto Frontier</div>
             </div>
           </div>
 
           <div className="bg-[#090C12] border border-white/[0.1] p-4 rounded-xs">
             <div className="text-xs font-mono text-[#FF1801] uppercase font-bold mb-1 flex items-center gap-1.5">
-              <Info className="w-3.5 h-3.5" /> PIT-WALL TELEMETRY DIAGNOSTIC WRITEUP
+              <Info className="w-3.5 h-3.5" /> POST-RACE TELEMETRY &amp; STRATEGY AUDIT LOG
             </div>
             <p className="text-xs font-mono text-neutral-200 leading-relaxed">
               {valData.analysis_writeup}

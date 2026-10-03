@@ -64,10 +64,10 @@ export default function LiveTimingTower({ trackId = 'monaco', trackName = 'Monac
             <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-2.5 top-2.5 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search driver/team..."
+              placeholder="FILTER BY DRIVER / CONSTRUCTOR / CAN-BUS ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-[#090B0E] border border-white/[0.1] text-xs font-mono text-white pl-8 pr-3 py-1.5 rounded-xs focus:outline-none focus:border-[#FF1801] placeholder-neutral-600"
+              className="bg-[#090B0E] border border-white/[0.1] text-xs font-mono text-white pl-8 pr-3 py-1.5 rounded-xs focus:outline-none focus:border-[#FF1801] placeholder-neutral-500 w-72"
             />
           </div>
         </div>
@@ -79,18 +79,18 @@ export default function LiveTimingTower({ trackId = 'monaco', trackName = 'Monac
           <thead>
             <tr className="border-b border-white/[0.1] text-[10px] text-neutral-400 uppercase tracking-wider bg-[#07090D]">
               <th className="py-2.5 px-3">POS</th>
-              <th className="py-2.5 px-3">NO</th>
-              <th className="py-2.5 px-3">DRIVER / TEAM</th>
-              <th className="py-2.5 px-3">STINT STRATEGY</th>
-              <th className="py-2.5 px-3 text-right">TOTAL TIME / GAP</th>
+              <th className="py-2.5 px-3">CAR</th>
+              <th className="py-2.5 px-3">DRIVER / CONSTRUCTOR</th>
+              <th className="py-2.5 px-3">COMPOUND ALLOCATION &amp; STINT AGE</th>
+              <th className="py-2.5 px-3 text-right">TOTAL TIME / LEADER GAP</th>
               <th className="py-2.5 px-3 text-right">INTERVAL</th>
-              <th className="py-2.5 px-3 text-right">BEST LAP</th>
+              <th className="py-2.5 px-3 text-right">FASTEST LAP</th>
               <th className="py-2.5 px-2 text-center">SECTOR 1</th>
               <th className="py-2.5 px-2 text-center">SECTOR 2</th>
               <th className="py-2.5 px-2 text-center">SECTOR 3</th>
-              <th className="py-2.5 px-3 text-right">SPEED TRAP</th>
-              <th className="py-2.5 px-2 text-center">PITS</th>
-              <th className="py-2.5 px-3 text-right">PIT STOP (S)</th>
+              <th className="py-2.5 px-3 text-right">SPEED TRAP I1</th>
+              <th className="py-2.5 px-2 text-center">STOPS</th>
+              <th className="py-2.5 px-3 text-right">STATIONARY BOX (s)</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.04]">

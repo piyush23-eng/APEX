@@ -69,7 +69,7 @@ export default function TireThermalTelemetry({ trackId = 'monaco', trackMeta }) 
       {/* Grid of Physical Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono text-xs">
         <div className="bg-[#090C12] p-3 rounded-xs border border-white/[0.1]">
-          <span className="text-[9px] text-neutral-400 uppercase block font-bold">PIRELLI ALLOCATION</span>
+          <span className="text-[9px] text-neutral-400 uppercase block font-bold">COMPOUND CODE &amp; GRADE</span>
           <strong className="text-xl font-bold text-white mt-0.5 block flex items-center gap-1.5">
             <span
               className="w-2.5 h-2.5 rounded-full"
@@ -77,31 +77,31 @@ export default function TireThermalTelemetry({ trackId = 'monaco', trackMeta }) 
             />
             {selectedComp} ({currentSpec.compound})
           </strong>
-          <span className="text-[10px] text-neutral-300">Peak Window: {currentSpec.peak_laps} Laps</span>
+          <span className="text-[10px] text-neutral-300">Peak Thermal Grip: {currentSpec.peak_laps} Laps</span>
         </div>
 
         <div className="bg-[#090C12] p-3 rounded-xs border border-white/[0.1]">
-          <span className="text-[9px] text-neutral-400 uppercase block font-bold">OPTIMAL CARCASS TEMP</span>
+          <span className="text-[9px] text-neutral-400 uppercase block font-bold">CARCASS BULK THERMAL WINDOW</span>
           <strong className="text-xl font-bold text-amber-400 mt-0.5 block">
             {currentSpec.working_range}
           </strong>
-          <span className="text-[10px] text-neutral-300">Thermal degradation threshold</span>
+          <span className="text-[10px] text-neutral-300">Optimum viscoelastic hysteresis range</span>
         </div>
 
         <div className="bg-[#090C12] p-3 rounded-xs border border-white/[0.1]">
-          <span className="text-[9px] text-neutral-400 uppercase block font-bold">DEGRADATION CLIFF LAP</span>
+          <span className="text-[9px] text-neutral-400 uppercase block font-bold">CRITICAL DEGRADATION CLIFF (L_crit)</span>
           <strong className="text-xl font-bold text-[#FF1801] mt-0.5 block">
             LAP {currentSpec.deg_cliff_lap}
           </strong>
-          <span className="text-[10px] text-neutral-300">Non-linear performance dropoff</span>
+          <span className="text-[10px] text-neutral-300">Thermal ablation &amp; delamination threshold</span>
         </div>
 
         <div className="bg-[#090C12] p-3 rounded-xs border border-white/[0.1]">
-          <span className="text-[9px] text-neutral-400 uppercase block font-bold">RUBBER LOSS RATE</span>
+          <span className="text-[9px] text-neutral-400 uppercase block font-bold">VOLUMETRIC RUBBER ABLATION RATE</span>
           <strong className="text-xl font-bold text-[#00E676] mt-0.5 block">
             {currentSpec.rubber_loss_um}
           </strong>
-          <span className="text-[10px] text-neutral-300">Graining Risk: {currentSpec.graining_risk}</span>
+          <span className="text-[10px] text-neutral-300">Cold Tear / Graining Risk: {currentSpec.graining_risk}</span>
         </div>
       </div>
 
@@ -109,8 +109,8 @@ export default function TireThermalTelemetry({ trackId = 'monaco', trackMeta }) 
       <div className="bg-[#080A0E] p-4 rounded-xs border border-white/[0.08] flex flex-col md:flex-row items-center justify-between gap-4 font-mono text-xs">
         <div className="flex-1 w-full">
           <div className="flex justify-between text-neutral-300 mb-1.5">
-            <span>SIMULATE STINT AGE: <strong className="text-white">{simLapAge} LAPS</strong></span>
-            <span>REMAINING TREAD: <strong className={remainingRubberPct < 30 ? 'text-[#FF1801]' : 'text-[#00E676]'}>{remainingRubberPct}%</strong></span>
+            <span>SIMULATE STINT AGING: <strong className="text-white">{simLapAge} LAPS</strong></span>
+            <span>RESIDUAL USABLE TREAD DEPTH: <strong className={remainingRubberPct < 30 ? 'text-[#FF1801]' : 'text-[#00E676]'}>{remainingRubberPct}%</strong></span>
           </div>
           <input
             type="range"
@@ -121,24 +121,24 @@ export default function TireThermalTelemetry({ trackId = 'monaco', trackMeta }) 
             className="w-full"
           />
           <div className="flex justify-between text-[9px] text-neutral-500 mt-1">
-            <span>Lap 1 (New)</span>
-            <span>Cliff: Lap {currentSpec.deg_cliff_lap}</span>
-            <span>Lap 60 (Exhausted)</span>
+            <span>Lap 1 (New Scrubbed)</span>
+            <span>Critical Cliff: Lap {currentSpec.deg_cliff_lap}</span>
+            <span>Lap 60 (Structural Failure)</span>
           </div>
         </div>
 
         <div className="bg-[#121620] px-4 py-2 rounded-xs border border-white/[0.08] shrink-0 text-right">
-          <span className="text-[9px] text-neutral-500 uppercase block">PACE DEFICIT RELATIVE TO T0</span>
+          <span className="text-[9px] text-neutral-500 uppercase block">CUMULATIVE PACE DEFICIT (&Delta;t_deg)</span>
           <strong className="text-2xl font-bold text-white block">
             +{totalPenalty}s<span className="text-xs text-neutral-400">/lap</span>
           </strong>
           {isPastCliff ? (
             <span className="text-[10px] text-[#FF1801] font-bold uppercase animate-pulse">
-              CLIFF REACHED (+{cliffPenalty}s EXTRA)
+              CRITICAL CLIFF CROSSED: NON-LINEAR THERMAL ABLATION (+{cliffPenalty}s)
             </span>
           ) : (
             <span className="text-[10px] text-emerald-400 uppercase">
-              LINEAR WEAR ZONE
+              LINEAR WEAR REGIME (HUBER FIT)
             </span>
           )}
         </div>

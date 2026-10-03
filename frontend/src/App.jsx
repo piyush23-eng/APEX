@@ -112,7 +112,7 @@ export default function App() {
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[#121622] hover:bg-[#1C2336] border border-white/[0.2] rounded-xs text-white cursor-pointer font-f1 text-xs transition-all"
           >
             <Sliders className="w-3.5 h-3.5 text-[#FF1801]" />
-            <span>SIMULATION CONFIG</span>
+            <span>TACTICAL ENGINE CALIBRATION</span>
           </button>
 
           <button
@@ -120,7 +120,7 @@ export default function App() {
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[#121622] hover:bg-[#1C2336] border border-white/[0.2] rounded-xs text-white cursor-pointer font-f1 text-xs transition-all"
           >
             <FileText className="w-3.5 h-3.5 text-neutral-300" />
-            <span>TECHNICAL SPECS</span>
+            <span>MATHEMATICAL ARCHITECTURE</span>
           </button>
         </div>
       </header>
@@ -190,7 +190,7 @@ export default function App() {
                 {currentTrackMeta.green_pit_loss.toFixed(1)}<span className="text-neutral-400 text-sm font-normal">s</span>
               </div>
               <div className="text-xs font-mono text-emerald-400 font-bold mt-0.5">
-                SC Transit: {currentTrackMeta.sc_pit_loss.toFixed(1)}s (+{(currentTrackMeta.green_pit_loss - currentTrackMeta.sc_pit_loss).toFixed(1)}s Bonus)
+                SC Pit Loss Delta: {currentTrackMeta.sc_pit_loss.toFixed(1)}s (+{(currentTrackMeta.green_pit_loss - currentTrackMeta.sc_pit_loss).toFixed(1)}s Net Advantage)
               </div>
             </div>
             <Gauge className="w-9 h-9 text-emerald-400 opacity-90" />
@@ -226,7 +226,7 @@ export default function App() {
               <div className="flex items-center gap-2">
                 <Sliders className="w-4 h-4 text-[#FF1801]" />
                 <h4 className="font-f1 text-sm font-bold text-white uppercase tracking-wider">
-                  Tactical Sensitivity &amp; Monte Carlo Engine Calibration
+                  Tactical Sensitivity &amp; Stochastic Engine Parameter Calibration
                 </h4>
               </div>
               <button
@@ -240,7 +240,7 @@ export default function App() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 font-mono text-xs">
               <div>
                 <div className="flex justify-between text-neutral-300 mb-1">
-                  <span>SAFETY CAR RATE</span>
+                  <span>STOCHASTIC SAFETY CAR PROBABILITY</span>
                   <strong className="text-white">{(scProbOverride * 100).toFixed(0)}%</strong>
                 </div>
                 <input
@@ -252,12 +252,12 @@ export default function App() {
                   onChange={(e) => setScProbOverride(parseFloat(e.target.value))}
                   className="w-full"
                 />
-                <span className="text-[10px] text-neutral-400">Historical: {(currentTrackMeta.historical_sc_rate * 100).toFixed(0)}%</span>
+                <span className="text-[10px] text-neutral-400">Historical Deployment Rate: {(currentTrackMeta.historical_sc_rate * 100).toFixed(0)}%</span>
               </div>
 
               <div>
                 <div className="flex justify-between text-neutral-300 mb-1">
-                  <span>TIRE WEAR MULTIPLIER</span>
+                  <span>THERMAL DEGRADATION MULTIPLIER (&lambda;)</span>
                   <strong className="text-white">{wearMultiplier.toFixed(2)}x</strong>
                 </div>
                 <input
@@ -269,12 +269,12 @@ export default function App() {
                   onChange={(e) => setWearMultiplier(parseFloat(e.target.value))}
                   className="w-full"
                 />
-                <span className="text-[10px] text-neutral-400">Track Temperature Sensitivity</span>
+                <span className="text-[10px] text-neutral-400">Track Surface Temp &amp; Micro-Roughness Sensitivity</span>
               </div>
 
               <div>
                 <div className="flex justify-between text-neutral-300 mb-1">
-                  <span>PIT STOP TRANSIT LOSS</span>
+                  <span>PIT LANE SPEED LIMITER TRANSIT LOSS (s)</span>
                   <strong className="text-white">{pitLossOverride.toFixed(1)}s</strong>
                 </div>
                 <input
@@ -286,7 +286,7 @@ export default function App() {
                   onChange={(e) => setPitLossOverride(parseFloat(e.target.value))}
                   className="w-full"
                 />
-                <span className="text-[10px] text-neutral-400">Pit Lane Limiter Transit</span>
+                <span className="text-[10px] text-neutral-400">Stationary 2.4s + In/Out Speed Limiter Transit</span>
               </div>
 
               <div className="flex flex-col justify-end">
@@ -298,12 +298,12 @@ export default function App() {
                   {isSimulating ? (
                     <>
                       <RotateCcw className="w-3.5 h-3.5 animate-spin" />
-                      SOLVING {simCount} ITERATIONS...
+                      VECTORIZING N={simCount} MONTE CARLO TRAJECTORIES...
                     </>
                   ) : (
                     <>
                       <Play className="w-3.5 h-3.5 fill-black" />
-                      RE-RUN VECTORIZED SOLVER
+                      RE-SOLVE STOCHASTIC TRAJECTORIES
                     </>
                   )}
                 </button>
@@ -322,7 +322,7 @@ export default function App() {
                 num: '1',
                 title: '1. FASTF1 CHANNEL TRACES',
                 desc: '10Hz Speed, Throttle, Brake, Gear & IMU Traces',
-                tag: '10Hz Telemetry',
+                tag: '10Hz SECU Telemetry',
                 icon: Activity
               },
               {
@@ -330,7 +330,7 @@ export default function App() {
                 num: '2',
                 title: '2. LIVE TIMING & SECTOR MATRIX',
                 desc: 'FIA Microsectors (S1/S2/S3), Speed Traps & Gap Delta',
-                tag: 'Official Splits',
+                tag: 'FIA Official Splits',
                 icon: Clock
               },
               {
@@ -338,7 +338,7 @@ export default function App() {
                 num: '3',
                 title: '3. UNDERCUT / OVERCUT SOLVER',
                 desc: 'Pit Window Crossover & Monte Carlo Strategy Deck',
-                tag: 'Tactical Calculator',
+                tag: 'Pit Delta Solver',
                 icon: Zap
               },
               {
@@ -346,7 +346,7 @@ export default function App() {
                 num: '4',
                 title: '4. PIRELLI COMPOUND PHYSICS',
                 desc: 'Thermal Windows, Carcass Wear & Huber Fit Curves',
-                tag: 'Tire Chemistry',
+                tag: 'Pirelli Thermal Windows',
                 icon: Flame
               }
             ].map(t => {
@@ -526,11 +526,11 @@ export default function App() {
               </div>
 
               <div className="bg-[#0A0D14] p-3.5 rounded-xs border border-white/[0.08]">
-                <strong className="text-white font-f1 text-sm block mb-1">4. MODEL LIMITATIONS &amp; KNOWN ASSUMPTIONS</strong>
+                <strong className="text-white font-f1 text-sm block mb-1">4. BOUNDARY CONDITIONS &amp; NUMERICAL CONSTRAINTS</strong>
                 <ul className="list-disc list-inside space-y-1 text-neutral-300 mt-1">
-                  <li>No dynamic wake / dirty-air aerodynamic loss modeling behind rival cars.</li>
-                  <li>No driver skill differentiation (calibrated to front-runner telemetry baseline).</li>
-                  <li>Pit stop stationary time fixed at 2.5s with Gaussian noise (sigma = 0.30s).</li>
+                  <li>Wake turbulence &amp; downforce decay in follow mode (&lt;1.0s dirty air) not dynamically coupled into clean-air baseline.</li>
+                  <li>Chassis telemetry calibrated to front-running driver baselines (Verstappen / Leclerc 10Hz traces).</li>
+                  <li>Stationary wheel gun service modeled as stochastic Gaussian variable (&mu;=2.45s, &sigma;=0.30s).</li>
                 </ul>
               </div>
             </div>
