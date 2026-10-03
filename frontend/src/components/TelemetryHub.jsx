@@ -162,11 +162,7 @@ export default function TelemetryHub({
             <button
               key={tab.id}
               onClick={() => setActiveSubTab(tab.id)}
-              className={`px-3.5 py-1.5 font-mono text-xs font-bold uppercase transition-all rounded-xs cursor-pointer ${
-                activeSubTab === tab.id
-                  ? 'bg-[#FF1801] text-black font-black shadow-[0_0_12px_rgba(255,24,1,0.5)]'
-                  : 'bg-[#0E121A] border border-white/[0.15] text-neutral-300 hover:text-white hover:border-neutral-400'
-              }`}
+              className={`f1-hub-tab-btn ${activeSubTab === tab.id ? 'f1-hub-tab-btn-active' : ''}`}
             >
               {tab.label}
             </button>
@@ -459,11 +455,7 @@ export default function TelemetryHub({
                   <button
                     key={comp}
                     onClick={() => setCompoundFilter(comp)}
-                    className={`px-3 py-1 font-bold uppercase rounded-xs cursor-pointer transition-all ${
-                      compoundFilter === comp
-                        ? 'bg-[#FF1801] text-black font-black shadow-[0_0_10px_rgba(255,24,1,0.5)]'
-                        : 'bg-[#0E121A] text-neutral-300 border border-white/[0.15] hover:text-white'
-                    }`}
+                    className={`f1-channel-pill ${compoundFilter === comp ? 'f1-channel-pill-active' : ''}`}
                   >
                     {comp}
                   </button>

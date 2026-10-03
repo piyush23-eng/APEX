@@ -54,11 +54,7 @@ export default function TireThermalTelemetry({ trackId = 'monaco', trackMeta }) 
             <button
               key={comp}
               onClick={() => setSelectedComp(comp)}
-              className={`px-3.5 py-1.5 font-bold uppercase rounded-xs transition-all cursor-pointer flex items-center ${
-                selectedComp === comp
-                  ? 'bg-white text-black font-black shadow-[0_0_12px_rgba(255,255,255,0.5)] scale-[1.03]'
-                  : 'bg-[#0E121A] border border-white/[0.15] text-neutral-300 hover:text-white hover:border-neutral-400'
-              }`}
+              className={`f1-compound-pill ${selectedComp === comp ? 'f1-compound-pill-active' : ''}`}
             >
               <span
                 className="w-2.5 h-2.5 rounded-full inline-block mr-1.5 shadow-xs"

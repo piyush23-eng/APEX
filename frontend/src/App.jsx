@@ -139,35 +139,23 @@ export default function App() {
 
         {/* Live Race Control Flag Switcher */}
         <div className="flex items-center gap-3 font-mono text-xs">
-          <div className="flex items-center gap-1 bg-[#050608] p-1 border border-white/[0.08] rounded-xs">
-            <span className="text-[10px] text-neutral-400 uppercase px-2 font-bold">RACE CONTROL:</span>
+          <div className="flex items-center gap-1.5 bg-[#050608] p-1.5 border border-white/[0.12] rounded-xs">
+            <span className="text-[10px] text-neutral-400 uppercase px-2 font-bold tracking-wider">RACE CONTROL:</span>
             <button
               onClick={() => setRaceFlag('GREEN')}
-              className={`px-2.5 py-1 text-[11px] font-bold rounded-xs cursor-pointer transition-all ${
-                raceFlag === 'GREEN'
-                  ? 'bg-[#00E676] text-black font-extrabold shadow-[0_0_10px_#00E676]'
-                  : 'text-neutral-300 hover:text-white'
-              }`}
+              className={`f1-flag-pill ${raceFlag === 'GREEN' ? 'f1-flag-green-active' : ''}`}
             >
               GREEN FLAG
             </button>
             <button
               onClick={() => setRaceFlag('SC')}
-              className={`px-2.5 py-1 text-[11px] font-bold rounded-xs cursor-pointer transition-all ${
-                raceFlag === 'SC'
-                  ? 'bg-[#FF9100] text-black font-extrabold shadow-[0_0_12px_#FF9100] animate-sc-beacon'
-                  : 'text-neutral-300 hover:text-white'
-              }`}
+              className={`f1-flag-pill ${raceFlag === 'SC' ? 'f1-flag-sc-active' : ''}`}
             >
               SAFETY CAR (SC)
             </button>
             <button
               onClick={() => setRaceFlag('VSC')}
-              className={`px-2.5 py-1 text-[11px] font-bold rounded-xs cursor-pointer transition-all ${
-                raceFlag === 'VSC'
-                  ? 'bg-[#FFF200] text-black font-extrabold shadow-[0_0_10px_#FFF200]'
-                  : 'text-neutral-300 hover:text-white'
-              }`}
+              className={`f1-flag-pill ${raceFlag === 'VSC' ? 'f1-flag-vsc-active' : ''}`}
             >
               VIRTUAL SC (VSC)
             </button>
@@ -244,23 +232,23 @@ export default function App() {
       {/* Main Container */}
       <main className="flex-1 p-6 max-w-7xl mx-auto w-full flex flex-col gap-6">
         {/* Top Grand Prix Selector Header Bar */}
-        <div className="f1-card p-5 border-l-4 border-l-[#FF1801] flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-xl">
+        <div className="f1-circuit-target-banner flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xs bg-[#FF1801]/20 border border-[#FF1801] flex items-center justify-center text-white shrink-0 shadow-[0_0_15px_rgba(255,24,1,0.4)]">
-              <Compass className="w-6 h-6 text-[#FF1801]" />
+            <div className="w-12 h-12 rounded-xs bg-[#FF1801]/25 border-2 border-[#FF1801] flex items-center justify-center text-white shrink-0 shadow-[0_0_18px_rgba(255,24,1,0.5)]">
+              <Compass className="w-7 h-7 text-[#FF1801]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#FF1801] shadow-[0_0_8px_#FF1801]" />
-                <span className="text-xs font-mono text-white uppercase tracking-wider font-extrabold">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#FF1801] shadow-[0_0_8px_#FF1801] animate-pulse" />
+                <span className="text-xs font-mono text-white uppercase tracking-wider font-black">
                   GRAND PRIX CIRCUIT TARGET:
                 </span>
-                <span className="font-f1 text-white font-extrabold text-xl tracking-wide uppercase">
+                <span className="font-f1 text-white font-black text-2xl tracking-wide uppercase">
                   {currentTrackMeta.name} ({currentTrackMeta.year})
                 </span>
               </div>
-              <div className="text-xs font-mono text-neutral-300 mt-1">
-                {currentTrackMeta.track_type} &bull; <strong className="text-white">{currentTrackMeta.laps} LAPS</strong> ({currentTrackMeta.circuit_length_km} KM) &bull; GREEN PIT LOSS: <strong className="text-white">{currentTrackMeta.green_pit_loss}s</strong>
+              <div className="text-xs font-mono text-neutral-200 mt-1">
+                {currentTrackMeta.track_type} &bull; <strong className="text-white font-bold">{currentTrackMeta.laps} LAPS</strong> ({currentTrackMeta.circuit_length_km} KM) &bull; GREEN PIT LOSS: <strong className="text-[#FF1801] font-bold">{currentTrackMeta.green_pit_loss}s</strong>
               </div>
             </div>
           </div>
@@ -268,7 +256,7 @@ export default function App() {
           {/* Dual Selection: 5 Direct Buttons + High-Visibility Dropdown */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             {/* Quick-Click Circuit Buttons */}
-            <div className="flex flex-wrap items-center gap-1.5 font-mono text-xs">
+            <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
               {tracks.map(t => {
                 const isSelected = t.id === selectedTrackId;
                 const flag = t.id === 'monaco' ? '🇲🇨' : t.id === 'hungary' ? '🇭🇺' : t.id === 'silverstone' ? '🇬🇧' : t.id === 'monza' ? '🇮🇹' : '🇧🇭';
@@ -279,11 +267,7 @@ export default function App() {
                       setSelectedTrackId(t.id);
                       setSelectedRank(1);
                     }}
-                    className={`px-3 py-2 font-bold uppercase rounded-xs transition-all cursor-pointer flex items-center gap-1.5 ${
-                      isSelected
-                        ? 'bg-[#FF1801] text-black font-extrabold shadow-[0_0_15px_rgba(255,24,1,0.6)] scale-[1.03]'
-                        : 'bg-[#0E121A] border border-white/[0.15] text-neutral-200 hover:text-white hover:border-[#FF1801]'
-                    }`}
+                    className={`f1-circuit-pill ${isSelected ? 'f1-circuit-pill-active' : ''}`}
                   >
                     <span>{flag}</span>
                     <span>{t.race.toUpperCase()}</span>
@@ -507,46 +491,37 @@ export default function App() {
                 <button
                   key={t.id}
                   onClick={() => setPrimaryTelemetryTab(t.id)}
-                  className={`p-4 rounded-xs border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 relative overflow-hidden group ${
-                    isActive
-                      ? 'bg-[#151B28] border-2 border-[#FF1801] shadow-[0_0_24px_rgba(255,24,1,0.55)] scale-[1.01]'
-                      : 'bg-[#0B0E16] border border-white/[0.18] hover:border-white/[0.45] hover:bg-[#121622]'
-                  }`}
+                  className={`f1-telemetry-btn ${isActive ? 'f1-telemetry-btn-active' : ''}`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className={`w-7 h-7 rounded-xs flex items-center justify-center font-mono font-black text-xs ${
-                        isActive ? 'bg-[#FF1801] text-black shadow-[0_0_10px_#FF1801]' : 'bg-white/10 text-white'
-                      }`}>
+                      <span className="btn-num">
                         {t.num}
                       </span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-xs bg-white/[0.08] text-neutral-300 font-bold uppercase tracking-wider">
+                      <span className="btn-tag">
                         {t.tag}
                       </span>
                     </div>
-                    {isActive && (
-                      <span className="flex items-center gap-1.5 text-[10px] font-mono text-[#00E676] font-bold">
-                        <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" />
+                    {isActive ? (
+                      <span className="btn-beacon">
+                        <span className="btn-beacon-dot" />
                         ACTIVE
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono text-neutral-400 font-bold uppercase">
+                        SELECT &bull; VIEW
                       </span>
                     )}
                   </div>
 
                   <div>
-                    <div className={`font-f1 font-extrabold text-sm sm:text-base tracking-wide uppercase ${
-                      isActive ? 'text-white' : 'text-neutral-100 group-hover:text-white'
-                    }`}>
+                    <div className="btn-title">
                       {t.title}
                     </div>
-                    <div className="text-xs font-mono text-neutral-300 mt-1 leading-snug">
+                    <div className="btn-desc">
                       {t.desc}
                     </div>
                   </div>
-
-                  {/* Active bottom accent bar */}
-                  {isActive && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#FF1801] shadow-[0_0_10px_#FF1801]" />
-                  )}
                 </button>
               );
             })}

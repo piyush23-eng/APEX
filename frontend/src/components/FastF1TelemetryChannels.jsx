@@ -112,11 +112,7 @@ export default function FastF1TelemetryChannels({ trackId = 'monaco', trackName 
             <button
               key={f.id}
               onClick={() => setActiveChannel(f.id)}
-              className={`px-3 py-1.5 font-bold uppercase rounded-xs transition-all cursor-pointer ${
-                activeChannel === f.id
-                  ? 'bg-[#FF1801] text-black font-black shadow-[0_0_12px_rgba(255,24,1,0.6)]'
-                  : 'bg-[#0E121A] border border-white/[0.15] text-neutral-300 hover:text-white hover:border-neutral-400'
-              }`}
+              className={`f1-channel-pill ${activeChannel === f.id ? 'f1-channel-pill-active' : ''}`}
             >
               {f.label}
             </button>
