@@ -151,21 +151,21 @@ export default function TelemetryHub({
   return (
     <div className="flex flex-col gap-6">
       {/* Sub-navigation Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1c202a] pb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.1] pb-3">
+        <div className="flex flex-wrap items-center gap-2">
           {[
-            { id: 'STRATEGY_DECK', label: '1. Monte Carlo Strategy Deck' },
-            { id: 'TIRE_SIGNAL', label: '2. Tire Degradation Signal' },
-            { id: 'GAP_DELTA', label: '3. Lap-by-Lap Gap Telemetry' },
-            { id: 'VALIDATION', label: '4. Ground-Truth Benchmark' }
+            { id: 'STRATEGY_DECK', label: '1. MONTE CARLO STRATEGY DECK' },
+            { id: 'TIRE_SIGNAL', label: '2. HUBER TIRE WEAR REGRESSION' },
+            { id: 'GAP_DELTA', label: '3. CUMULATIVE GAP DELTA TO P1' },
+            { id: 'VALIDATION', label: '4. FIA GROUND-TRUTH BENCHMARK' }
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveSubTab(tab.id)}
               className={`px-3.5 py-1.5 font-mono text-xs font-bold uppercase transition-all rounded-xs cursor-pointer ${
                 activeSubTab === tab.id
-                  ? 'bg-[#FF1801] text-black font-extrabold shadow-sm'
-                  : 'bg-[#0E1015] border border-[#212530] text-neutral-400 hover:text-white hover:border-[#383d4c]'
+                  ? 'bg-[#FF1801] text-black font-black shadow-[0_0_12px_rgba(255,24,1,0.5)]'
+                  : 'bg-[#0E121A] border border-white/[0.15] text-neutral-300 hover:text-white hover:border-neutral-400'
               }`}
             >
               {tab.label}
@@ -173,12 +173,12 @@ export default function TelemetryHub({
           ))}
         </div>
 
-        <div className="flex items-center gap-3 text-xs font-mono text-neutral-400">
+        <div className="flex items-center gap-3 text-xs font-mono text-neutral-300">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> SIMULATION N=1,000
+            <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" /> SOLVER N=1,000 ITERATIONS
           </span>
           <span className="text-neutral-600">|</span>
-          <span>FUEL MASS BIAS: -{trackMeta.fuel_burn_rate}s/lap</span>
+          <span>FUEL MASS NORMALIZATION: -{trackMeta.fuel_burn_rate}s/LAP</span>
         </div>
       </div>
 
@@ -229,13 +229,13 @@ export default function TelemetryHub({
 
           {/* Visual Stint Gantt Timeline */}
           <div className="f1-card p-5 flex flex-col gap-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#21242e] pb-3 gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.1] pb-3 gap-2">
               <div>
-                <h3 className="font-f1 text-lg font-bold text-white tracking-wider">
-                  Stint Life &amp; Mandatory Pit Windows (Gantt Architecture)
+                <h3 className="font-f1 text-lg font-bold text-white tracking-wider uppercase">
+                  STINT TRAJECTORY &amp; MANDATORY PIT WINDOW TIMELINE
                 </h3>
-                <p className="text-xs font-mono text-neutral-400 mt-0.5">
-                  Proportional tire age duration, cross-over thresholds, and box laps across all 10 candidates
+                <p className="text-xs font-mono text-neutral-300 mt-1">
+                  Compound life duration, tire cliff cross-over points, and strategic box windows across all 10 candidate strategies
                 </p>
               </div>
               <div className="flex items-center gap-3 text-xs font-mono">
@@ -443,13 +443,13 @@ export default function TelemetryHub({
 
           {/* Scatter Chart */}
           <div className="f1-card p-5 flex flex-col gap-4">
-            <div className="flex items-center justify-between border-b border-[#21242e] pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.1] pb-3 gap-2">
               <div>
-                <h3 className="font-f1 text-lg font-bold text-white tracking-wider">
-                  Raw FastF1 Telemetry Signal vs. Linear Degradation Fit
+                <h3 className="font-f1 text-lg font-bold text-white tracking-wider uppercase">
+                  FASTF1 EMPIRICAL TIRE WEAR SIGNAL VS. HUBER M-ESTIMATOR FIT
                 </h3>
-                <p className="text-xs font-mono text-neutral-400 mt-0.5">
-                  Normalized fuel-corrected lap times as a function of stint age. Outliers (&gt;2.5s) and safety car laps removed.
+                <p className="text-xs font-mono text-neutral-300 mt-1">
+                  Fuel-mass-corrected lap times as a function of stint age. Outliers (&gt;2.5s) and safety car laps filtered via robust Huber loss regression.
                 </p>
               </div>
 
@@ -459,10 +459,10 @@ export default function TelemetryHub({
                   <button
                     key={comp}
                     onClick={() => setCompoundFilter(comp)}
-                    className={`px-3 py-1 font-bold uppercase rounded-xs cursor-pointer ${
+                    className={`px-3 py-1 font-bold uppercase rounded-xs cursor-pointer transition-all ${
                       compoundFilter === comp
-                        ? 'bg-[#E10600] text-black'
-                        : 'bg-[#111319] text-neutral-400 border border-[#21242e]'
+                        ? 'bg-[#FF1801] text-black font-black shadow-[0_0_10px_rgba(255,24,1,0.5)]'
+                        : 'bg-[#0E121A] text-neutral-300 border border-white/[0.15] hover:text-white'
                     }`}
                   >
                     {comp}
@@ -528,12 +528,12 @@ export default function TelemetryHub({
       {/* VIEW 3: GAP DELTA */}
       {activeSubTab === 'GAP_DELTA' && (
         <div className="f1-card p-5 flex flex-col gap-4">
-          <div className="border-b border-[#21242e] pb-3">
-            <h3 className="font-f1 text-lg font-bold text-white tracking-wider">
-              Simulated Head-to-Head Delta to P1 ({strategies[0]?.name})
+          <div className="border-b border-white/[0.1] pb-3">
+            <h3 className="font-f1 text-lg font-bold text-white tracking-wider uppercase">
+              CUMULATIVE GAP DELTA RELATIVE TO P1 ({strategies[0]?.name})
             </h3>
-            <p className="text-xs font-mono text-neutral-400 mt-0.5">
-              Cumulative race time differential. Negative values denote on-track leads; positive values denote time deficits.
+            <p className="text-xs font-mono text-neutral-300 mt-1">
+              Lap-by-lap cumulative race time differential. Negative values denote on-track leads; positive values denote time deficits.
             </p>
           </div>
 
@@ -541,9 +541,9 @@ export default function TelemetryHub({
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={paceDeltaData} margin={{ top: 15, right: 25, bottom: 15, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#161820" />
-                <XAxis dataKey="lap" unit="L" stroke="#555" tick={{ fill: '#808080', fontSize: 11, fontFamily: 'JetBrains Mono' }} />
-                <YAxis unit="s" stroke="#555" tick={{ fill: '#808080', fontSize: 11, fontFamily: 'JetBrains Mono' }} />
-                <ReferenceLine y={0} stroke="#34d399" strokeDasharray="4 4" />
+                <XAxis dataKey="lap" unit="L" stroke="#555" tick={{ fill: '#888', fontSize: 11, fontFamily: 'JetBrains Mono' }} />
+                <YAxis unit="s" stroke="#555" tick={{ fill: '#888', fontSize: 11, fontFamily: 'JetBrains Mono' }} />
+                <ReferenceLine y={0} stroke="#00E676" strokeDasharray="4 4" />
                 <Tooltip
                   content={({ active, payload, label }) => {
                     if (active && payload && payload.length) {
@@ -570,13 +570,13 @@ export default function TelemetryHub({
       {/* VIEW 4: VALIDATION BENCHMARK */}
       {activeSubTab === 'VALIDATION' && valData && (
         <div className="f1-card p-5 flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#21242e] pb-3 gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.1] pb-3 gap-2">
             <div>
-              <h3 className="font-f1 text-lg font-bold text-white tracking-wider">
-                Ground-Truth Benchmark: {valData.track} ({valData.year})
+              <h3 className="font-f1 text-lg font-bold text-white tracking-wider uppercase">
+                FIA OFFICIAL RACE VALIDATION BENCHMARK &bull; {valData.track.toUpperCase()} ({valData.year})
               </h3>
-              <p className="text-xs font-mono text-neutral-400 mt-0.5">
-                Evaluation of real team tactical decisions against Monte Carlo simulator rankings
+              <p className="text-xs font-mono text-neutral-300 mt-1">
+                Post-race ground-truth audit comparing actual pit wall telemetry against Monte Carlo solver candidate rankings
               </p>
             </div>
             <span className={`px-3 py-1 font-mono text-xs font-bold uppercase rounded-xs border ${
@@ -591,32 +591,32 @@ export default function TelemetryHub({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-[#090B0E] border border-[#1b1e26] p-4 rounded-xs">
-              <div className="text-[10px] font-mono text-neutral-400 uppercase mb-1 font-semibold">ACTUAL RACE WINNER</div>
+            <div className="bg-[#090C12] border border-white/[0.1] p-4 rounded-xs">
+              <div className="text-[10px] font-mono text-neutral-400 uppercase mb-1 font-bold">ACTUAL RACE WINNER (GROUND TRUTH)</div>
               <div className="font-f1 text-2xl font-bold text-white mb-2">{valData.winner.driver} &bull; {valData.winner.team}</div>
               <div className="flex items-center gap-2 mb-2">
                 {valData.winner.stints.map((st, i) => (
-                  <span key={i} className="px-2 py-0.5 bg-[#12141c] border border-[#21242e] text-xs font-mono text-white rounded-xs">
+                  <span key={i} className="px-2 py-0.5 bg-[#121620] border border-white/[0.12] text-xs font-mono text-white rounded-xs">
                     {st.compound} ({st.length}L)
                   </span>
                 ))}
               </div>
-              <div className="text-xs font-mono text-neutral-400">Actual Pit Lap: <strong>{valData.winner.pit_laps.join(', ') || 'None'}</strong></div>
+              <div className="text-xs font-mono text-neutral-300">Actual Pit Lap: <strong className="text-white">{valData.winner.pit_laps.join(', ') || 'None'}</strong></div>
             </div>
 
-            <div className="bg-[#090B0E] border border-[#1b1e26] p-4 rounded-xs">
-              <div className="text-[10px] font-mono text-neutral-400 uppercase mb-1 font-semibold">MODEL RANKED PREDICTION</div>
-              <div className="font-f1 text-xl font-bold text-[#E10600] mb-2">{valData.model_match.matched_strategy_name}</div>
-              <div className="text-xs font-mono text-neutral-300 mb-2">Pit Offset: <strong>{valData.model_match.pit_error_laps} Laps Delta</strong></div>
-              <div className="text-xs font-mono text-emerald-400">Sim Strategy Match: Rank #{valData.model_match.rank} of 10 Candidates</div>
+            <div className="bg-[#090C12] border border-white/[0.1] p-4 rounded-xs">
+              <div className="text-[10px] font-mono text-neutral-400 uppercase mb-1 font-bold">SOLVER TOP-RANKED MATCH</div>
+              <div className="font-f1 text-xl font-bold text-[#FF1801] mb-2">{valData.model_match.matched_strategy_name}</div>
+              <div className="text-xs font-mono text-neutral-300 mb-2">Pit Offset: <strong className="text-white">{valData.model_match.pit_error_laps} Laps Delta</strong></div>
+              <div className="text-xs font-mono text-[#00E676] font-bold">Solver Calibration Match: Rank #{valData.model_match.rank} of 10 Candidates</div>
             </div>
           </div>
 
-          <div className="bg-[#090B0E] border border-[#1b1e26] p-4 rounded-xs">
-            <div className="text-xs font-mono text-[#E10600] uppercase font-bold mb-1 flex items-center gap-1.5">
-              <Info className="w-3.5 h-3.5" /> RACING &amp; TELEMETRY DIAGNOSTIC WRITEUP
+          <div className="bg-[#090C12] border border-white/[0.1] p-4 rounded-xs">
+            <div className="text-xs font-mono text-[#FF1801] uppercase font-bold mb-1 flex items-center gap-1.5">
+              <Info className="w-3.5 h-3.5" /> PIT-WALL TELEMETRY DIAGNOSTIC WRITEUP
             </div>
-            <p className="text-xs font-mono text-neutral-300 leading-relaxed">
+            <p className="text-xs font-mono text-neutral-200 leading-relaxed">
               {valData.analysis_writeup}
             </p>
           </div>

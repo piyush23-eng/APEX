@@ -125,14 +125,14 @@ export default function App() {
                 APEX STRAT
               </span>
               <span className="text-[10px] font-mono px-2 py-0.5 bg-[#FF1801]/15 text-[#FF2B16] border border-[#FF1801]/40 font-bold rounded-xs">
-                PIT-WALL TELEMETRY ENGINE
+                F1 RACE OPERATIONS &amp; TELEMETRY DESK
               </span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 bg-white/[0.06] text-neutral-400 border border-white/[0.08] rounded-xs hidden sm:inline">
-                BUILD v2.4 PRO
+              <span className="text-[10px] font-mono px-1.5 py-0.5 bg-white/[0.06] text-neutral-300 border border-white/[0.08] rounded-xs hidden sm:inline">
+                FASTF1 v3.4 PIPELINE
               </span>
             </div>
             <div className="text-[10px] font-mono text-neutral-400 tracking-widest uppercase mt-0.5">
-              FASTF1 TELEMETRY PIPELINE &bull; HUBER M-ESTIMATOR &bull; MONTE CARLO STOCHASTIC SOLVER
+              TELEMETRY INGESTION &bull; FUEL-CORRECTED HUBER REGRESSION &bull; STOCHASTIC RACE TRAJECTORY SIMULATOR
             </div>
           </div>
         </div>
@@ -140,54 +140,54 @@ export default function App() {
         {/* Live Race Control Flag Switcher */}
         <div className="flex items-center gap-3 font-mono text-xs">
           <div className="flex items-center gap-1 bg-[#050608] p-1 border border-white/[0.08] rounded-xs">
-            <span className="text-[10px] text-neutral-500 uppercase px-2 font-bold">RACE CONTROL:</span>
+            <span className="text-[10px] text-neutral-400 uppercase px-2 font-bold">RACE CONTROL:</span>
             <button
               onClick={() => setRaceFlag('GREEN')}
               className={`px-2.5 py-1 text-[11px] font-bold rounded-xs cursor-pointer transition-all ${
                 raceFlag === 'GREEN'
                   ? 'bg-[#00E676] text-black font-extrabold shadow-[0_0_10px_#00E676]'
-                  : 'text-neutral-400 hover:text-white'
+                  : 'text-neutral-300 hover:text-white'
               }`}
             >
-              GREEN
+              GREEN FLAG
             </button>
             <button
               onClick={() => setRaceFlag('SC')}
               className={`px-2.5 py-1 text-[11px] font-bold rounded-xs cursor-pointer transition-all ${
                 raceFlag === 'SC'
                   ? 'bg-[#FF9100] text-black font-extrabold shadow-[0_0_12px_#FF9100] animate-sc-beacon'
-                  : 'text-neutral-400 hover:text-white'
+                  : 'text-neutral-300 hover:text-white'
               }`}
             >
-              SC (SAFETY CAR)
+              SAFETY CAR (SC)
             </button>
             <button
               onClick={() => setRaceFlag('VSC')}
               className={`px-2.5 py-1 text-[11px] font-bold rounded-xs cursor-pointer transition-all ${
                 raceFlag === 'VSC'
                   ? 'bg-[#FFF200] text-black font-extrabold shadow-[0_0_10px_#FFF200]'
-                  : 'text-neutral-400 hover:text-white'
+                  : 'text-neutral-300 hover:text-white'
               }`}
             >
-              VSC
+              VIRTUAL SC (VSC)
             </button>
           </div>
 
           {/* Quick Actions */}
           <button
             onClick={() => setShowConfigModal(!showConfigModal)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#10141D] hover:bg-[#181E2C] border border-white/[0.1] rounded-xs text-neutral-300 cursor-pointer font-f1 text-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#10141D] hover:bg-[#181E2C] border border-white/[0.15] rounded-xs text-white cursor-pointer font-f1 text-xs"
           >
             <Sliders className="w-3.5 h-3.5 text-[#FF1801]" />
-            <span>CALIBRATION</span>
+            <span>SIMULATION CONFIG</span>
           </button>
 
           <button
             onClick={() => setShowWhitepaperModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#10141D] hover:bg-[#181E2C] border border-white/[0.1] rounded-xs text-neutral-300 cursor-pointer font-f1 text-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#10141D] hover:bg-[#181E2C] border border-white/[0.15] rounded-xs text-white cursor-pointer font-f1 text-xs"
           >
-            <FileText className="w-3.5 h-3.5 text-neutral-400" />
-            <span>MODEL SPECS</span>
+            <FileText className="w-3.5 h-3.5 text-neutral-300" />
+            <span>TECHNICAL SPECS</span>
           </button>
         </div>
       </header>
@@ -197,13 +197,13 @@ export default function App() {
         <div className="bg-[#1C1204] border-b border-[#FF9100] px-6 py-2 flex items-center justify-between text-xs font-mono text-[#FF9100] shadow-[0_4px_20px_rgba(255,145,0,0.25)]">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-[#FF9100] animate-sc-beacon" />
-            <strong className="tracking-wide">TACTICAL OPPORTUNITY: SAFETY CAR DEPLOYED</strong>
-            <span className="text-neutral-300 hidden md:inline">
-              &bull; Pack pace neutralized to 60% throttle. Pit transit penalty drops from {currentTrackMeta.green_pit_loss}s to {currentTrackMeta.sc_pit_loss}s.
+            <strong className="tracking-wide">SAFETY CAR DEPLOYED (LAP DELTA NEUTRALIZED)</strong>
+            <span className="text-neutral-200 hidden md:inline">
+              &bull; Pack held to delta pace (~60% throttle). Pit loss reduced from {currentTrackMeta.green_pit_loss}s to {currentTrackMeta.sc_pit_loss}s.
             </span>
           </div>
           <span className="bg-[#FF9100] text-black font-bold px-2 py-0.5 rounded-xs uppercase">
-            EXPECTED DELTA SAVING: +{(currentTrackMeta.green_pit_loss - currentTrackMeta.sc_pit_loss).toFixed(1)}s
+            FREE PIT ADVANTAGE: +{(currentTrackMeta.green_pit_loss - currentTrackMeta.sc_pit_loss).toFixed(1)}s NET GAIN
           </span>
         </div>
       )}
@@ -216,7 +216,7 @@ export default function App() {
             <span>TRACK: <strong className="text-white">44.8°C</strong></span>
           </span>
           <span className="flex items-center gap-1.5">
-            <Thermometer className="w-3.5 h-3.5 text-neutral-400" />
+            <Thermometer className="w-3.5 h-3.5 text-neutral-300" />
             <span>AIR: <strong className="text-white">28.6°C</strong></span>
           </span>
           <span className="flex items-center gap-1.5">
@@ -224,11 +224,11 @@ export default function App() {
             <span>WIND: <strong className="text-white">2.8 M/S SSE</strong></span>
           </span>
           <span className="flex items-center gap-1.5">
-            <CloudRain className="w-3.5 h-3.5 text-neutral-500" />
+            <CloudRain className="w-3.5 h-3.5 text-neutral-400" />
             <span>RAIN PROB: <strong className="text-white">0% (DRY)</strong></span>
           </span>
           <span className="hidden lg:inline text-neutral-500">|</span>
-          <span className="hidden lg:inline text-neutral-300">
+          <span className="hidden lg:inline text-neutral-200">
             TRACK EVOLUTION: <strong className="text-emerald-400">+0.22s/STINT</strong>
           </span>
         </div>
@@ -237,7 +237,7 @@ export default function App() {
         <div className="flex items-center gap-2 text-[11px] truncate max-w-xl">
           <Volume2 className="w-3.5 h-3.5 text-[#FF1801] shrink-0 animate-pulse" />
           <span className="text-[#FF1801] font-bold shrink-0">{RADIO_MESSAGES[radioIdx].time} [{RADIO_MESSAGES[radioIdx].sender}]:</span>
-          <span className="text-neutral-300 truncate italic">"{RADIO_MESSAGES[radioIdx].text}"</span>
+          <span className="text-neutral-200 truncate italic">"{RADIO_MESSAGES[radioIdx].text}"</span>
         </div>
       </div>
 
@@ -463,39 +463,93 @@ export default function App() {
           </div>
         )}
 
-        {/* PRIMARY TELEMETRY CONSOLE (Replacing 3D with authentic pit-wall telemetry modules) */}
+        {/* PRIMARY TELEMETRY CONSOLE */}
         <section className="flex flex-col gap-4">
-          {/* Telemetry Switcher Tabs */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.08] pb-2">
-            <div className="flex items-center gap-2">
-              {[
-                { id: 'CHANNELS', label: '1. FastF1 Channel Traces', icon: Activity },
-                { id: 'TIMING', label: '2. Live Timing & Sector Matrix', icon: Clock },
-                { id: 'UNDERCUT', label: '3. Undercut / Overcut Solver', icon: Zap },
-                { id: 'TIRES', label: '4. Pirelli Compound Physics', icon: Flame }
-              ].map(t => {
-                const Icon = t.icon;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setPrimaryTelemetryTab(t.id)}
-                    className={`flex items-center gap-2 px-4 py-2 font-mono text-xs font-bold uppercase transition-all rounded-xs cursor-pointer ${
-                      primaryTelemetryTab === t.id
-                        ? 'bg-white text-black font-extrabold shadow-[0_0_15px_rgba(255,255,255,0.4)]'
-                        : 'bg-[#0E1015] border border-white/[0.08] text-neutral-400 hover:text-white hover:border-white/[0.2]'
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    <span>{t.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+          {/* Engineering Telemetry Subsystem Deck (4 Distinct High-Visibility Cards) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {[
+              {
+                id: 'CHANNELS',
+                num: '1',
+                title: '1. FASTF1 CHANNEL TRACES',
+                desc: 'Speed, Throttle, Brake, Gear & G-Load',
+                tag: '10Hz Telemetry',
+                icon: Activity
+              },
+              {
+                id: 'TIMING',
+                num: '2',
+                title: '2. LIVE TIMING & SECTOR MATRIX',
+                desc: 'FIA Microsectors (S1/S2/S3) & Speed Traps',
+                tag: 'Official Splits',
+                icon: Clock
+              },
+              {
+                id: 'UNDERCUT',
+                num: '3',
+                title: '3. UNDERCUT / OVERCUT SOLVER',
+                desc: 'Pit Crossover & Track Position Delta',
+                tag: 'Tactical Calculator',
+                icon: Zap
+              },
+              {
+                id: 'TIRES',
+                num: '4',
+                title: '4. PIRELLI COMPOUND PHYSICS',
+                desc: 'Thermal Windows, Carcass Wear & Cliffs',
+                tag: 'Tire Chemistry',
+                icon: Flame
+              }
+            ].map(t => {
+              const Icon = t.icon;
+              const isActive = primaryTelemetryTab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setPrimaryTelemetryTab(t.id)}
+                  className={`p-4 rounded-xs border text-left transition-all cursor-pointer flex flex-col justify-between gap-3 relative overflow-hidden group ${
+                    isActive
+                      ? 'bg-[#151B28] border-2 border-[#FF1801] shadow-[0_0_24px_rgba(255,24,1,0.55)] scale-[1.01]'
+                      : 'bg-[#0B0E16] border border-white/[0.18] hover:border-white/[0.45] hover:bg-[#121622]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-7 h-7 rounded-xs flex items-center justify-center font-mono font-black text-xs ${
+                        isActive ? 'bg-[#FF1801] text-black shadow-[0_0_10px_#FF1801]' : 'bg-white/10 text-white'
+                      }`}>
+                        {t.num}
+                      </span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-xs bg-white/[0.08] text-neutral-300 font-bold uppercase tracking-wider">
+                        {t.tag}
+                      </span>
+                    </div>
+                    {isActive && (
+                      <span className="flex items-center gap-1.5 text-[10px] font-mono text-[#00E676] font-bold">
+                        <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" />
+                        ACTIVE
+                      </span>
+                    )}
+                  </div>
 
-            <div className="flex items-center gap-2 text-xs font-mono text-neutral-400">
-              <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" />
-              <span>LIVE TELEMETRY STREAM: <strong className="text-white">ACTIVE</strong></span>
-            </div>
+                  <div>
+                    <div className={`font-f1 font-extrabold text-sm sm:text-base tracking-wide uppercase ${
+                      isActive ? 'text-white' : 'text-neutral-100 group-hover:text-white'
+                    }`}>
+                      {t.title}
+                    </div>
+                    <div className="text-xs font-mono text-neutral-300 mt-1 leading-snug">
+                      {t.desc}
+                    </div>
+                  </div>
+
+                  {/* Active bottom accent bar */}
+                  {isActive && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#FF1801] shadow-[0_0_10px_#FF1801]" />
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Active Telemetry Component View */}
@@ -542,13 +596,15 @@ export default function App() {
       </main>
 
       {/* Engineering Footer */}
-      <footer className="border-t border-white/[0.08] px-6 py-6 text-center text-xs font-mono text-neutral-500 bg-[#07090D] flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto w-full gap-3">
+      <footer className="border-t border-white/[0.08] px-6 py-6 text-center text-xs font-mono text-neutral-400 bg-[#07090D] flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto w-full gap-3">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#FF1801]" />
-          <span>MOTORSPORT SPECIFICATION: HUBER REGRESSION &bull; MONTE CARLO STOCHASTICS &bull; FASTF1 API</span>
+          <span className="w-2.5 h-2.5 rounded-full bg-[#FF1801] shadow-[0_0_8px_#FF1801]" />
+          <span className="text-neutral-300">
+            RACE STRATEGY &amp; VEHICLE TELEMETRY SYSTEM &bull; FASTF1 TELEMETRY API &bull; HUBER TIRE WEAR REGRESSION &bull; MONTE CARLO STOCHASTICS
+          </span>
         </div>
-        <div className="text-neutral-400">
-          ENGINEERED FOR FORMULA 1 RACE STRATEGY &amp; APPLIED DATA SCIENCE INTERVIEWS
+        <div className="text-neutral-300">
+          DEVELOPED FOR REAL-TIME FORMULA 1 PIT-WALL DECISION SUPPORT &bull; FIA TIMING REPLAY
         </div>
       </footer>
 

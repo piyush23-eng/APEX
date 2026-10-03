@@ -31,32 +31,32 @@ export default function LiveTimingTower({ trackId = 'monaco', trackName = 'Monac
   return (
     <div className="f1-card p-5 flex flex-col gap-4">
       {/* Timing Tower Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-3 gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.1] pb-3 gap-3">
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 bg-[#FF1801] inline-block shadow-[0_0_8px_#FF1801]" />
             <h3 className="font-f1 text-xl font-bold text-white tracking-wider">
-              Official FIA Live Timing &amp; Sector Split Matrix
+              2. LIVE TIMING &amp; SECTOR MATRIX (FIA CLASSIFICATION &amp; SPLITS)
             </h3>
-            <span className="text-[10px] font-mono px-2 py-0.5 bg-white/[0.06] text-neutral-300 border border-white/[0.1] rounded-xs uppercase">
-              {trackName}
+            <span className="text-[10px] font-mono px-2 py-0.5 bg-white/[0.08] text-white border border-white/[0.15] font-bold rounded-xs uppercase">
+              {trackName} GRAND PRIX
             </span>
           </div>
-          <p className="text-xs font-mono text-neutral-400 mt-0.5">
-            Microsector telemetry, stint compound sequence, and pit stop stationary duration
+          <p className="text-xs font-mono text-neutral-300 mt-1">
+            Official microsector timing (S1/S2/S3), intermediate speed traps, compound stint progression, and stationary pit lane duration
           </p>
         </div>
 
         {/* Legend & Search */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 font-mono text-xs hidden md:flex">
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-xs bg-[#B026FF]" />
-              <span className="text-[#D67AFF]">OVERALL BEST</span>
+          <div className="flex items-center gap-3 font-mono text-xs hidden md:flex">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-[#B026FF] shadow-[0_0_6px_#B026FF]" />
+              <span className="text-[#D67AFF] font-bold">SESSION BEST</span>
             </span>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-xs bg-[#00E676]" />
-              <span className="text-[#00E676]">PERSONAL BEST</span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-xs bg-[#00E676] shadow-[0_0_6px_#00E676]" />
+              <span className="text-[#00E676] font-bold">PERSONAL BEST</span>
             </span>
           </div>
 

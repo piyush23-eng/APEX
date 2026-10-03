@@ -35,16 +35,16 @@ export default function TireThermalTelemetry({ trackId = 'monaco', trackMeta }) 
   return (
     <div className="f1-card p-5 flex flex-col gap-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-3 gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.1] pb-3 gap-2">
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 bg-[#FF1801] inline-block shadow-[0_0_8px_#FF1801]" />
             <h3 className="font-f1 text-xl font-bold text-white tracking-wider">
-              Pirelli Thermal Degradation &amp; Rubber Compound Matrix
+              4. PIRELLI COMPOUND PHYSICS &bull; THERMAL DEGRADATION CLIFFS
             </h3>
           </div>
-          <p className="text-xs font-mono text-neutral-400 mt-0.5">
-            Physical rubber compound characteristics, carcass operating windows, and cliff lap triggers
+          <p className="text-xs font-mono text-neutral-300 mt-1">
+            Physical rubber compound specifications, carcass thermal operating windows, volumetric wear rates, and non-linear degradation cliffs
           </p>
         </div>
 
@@ -54,14 +54,14 @@ export default function TireThermalTelemetry({ trackId = 'monaco', trackMeta }) 
             <button
               key={comp}
               onClick={() => setSelectedComp(comp)}
-              className={`px-3 py-1 font-bold uppercase rounded-xs transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 font-bold uppercase rounded-xs transition-all cursor-pointer flex items-center ${
                 selectedComp === comp
-                  ? 'bg-white text-black font-extrabold shadow-sm'
-                  : 'bg-[#0E1015] border border-white/[0.08] text-neutral-400 hover:text-white'
+                  ? 'bg-white text-black font-black shadow-[0_0_12px_rgba(255,255,255,0.5)] scale-[1.03]'
+                  : 'bg-[#0E121A] border border-white/[0.15] text-neutral-300 hover:text-white hover:border-neutral-400'
               }`}
             >
               <span
-                className="w-2 h-2 rounded-full inline-block mr-1.5"
+                className="w-2.5 h-2.5 rounded-full inline-block mr-1.5 shadow-xs"
                 style={{ backgroundColor: COMPOUND_COLORS[comp] }}
               />
               {comp}
@@ -72,8 +72,8 @@ export default function TireThermalTelemetry({ trackId = 'monaco', trackMeta }) 
 
       {/* Grid of Physical Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono text-xs">
-        <div className="bg-[#090B0E] p-3 rounded-xs border border-white/[0.06]">
-          <span className="text-[9px] text-neutral-500 uppercase block">PIRELLI ALLOCATION</span>
+        <div className="bg-[#090C12] p-3 rounded-xs border border-white/[0.1]">
+          <span className="text-[9px] text-neutral-400 uppercase block font-bold">PIRELLI ALLOCATION</span>
           <strong className="text-xl font-bold text-white mt-0.5 block flex items-center gap-1.5">
             <span
               className="w-2.5 h-2.5 rounded-full"
@@ -81,31 +81,31 @@ export default function TireThermalTelemetry({ trackId = 'monaco', trackMeta }) 
             />
             {selectedComp} ({currentSpec.compound})
           </strong>
-          <span className="text-[9px] text-neutral-400">Peak Window: {currentSpec.peak_laps} Laps</span>
+          <span className="text-[10px] text-neutral-300">Peak Window: {currentSpec.peak_laps} Laps</span>
         </div>
 
-        <div className="bg-[#090B0E] p-3 rounded-xs border border-white/[0.06]">
-          <span className="text-[9px] text-neutral-500 uppercase block">OPTIMAL CARCASS TEMP</span>
+        <div className="bg-[#090C12] p-3 rounded-xs border border-white/[0.1]">
+          <span className="text-[9px] text-neutral-400 uppercase block font-bold">OPTIMAL CARCASS TEMP</span>
           <strong className="text-xl font-bold text-amber-400 mt-0.5 block">
             {currentSpec.working_range}
           </strong>
-          <span className="text-[9px] text-neutral-400">Thermal degradation threshold</span>
+          <span className="text-[10px] text-neutral-300">Thermal degradation threshold</span>
         </div>
 
-        <div className="bg-[#090B0E] p-3 rounded-xs border border-white/[0.06]">
-          <span className="text-[9px] text-neutral-500 uppercase block">DEGRADATION CLIFF LAP</span>
+        <div className="bg-[#090C12] p-3 rounded-xs border border-white/[0.1]">
+          <span className="text-[9px] text-neutral-400 uppercase block font-bold">DEGRADATION CLIFF LAP</span>
           <strong className="text-xl font-bold text-[#FF1801] mt-0.5 block">
             LAP {currentSpec.deg_cliff_lap}
           </strong>
-          <span className="text-[9px] text-neutral-400">Non-linear performance loss</span>
+          <span className="text-[10px] text-neutral-300">Non-linear performance dropoff</span>
         </div>
 
-        <div className="bg-[#090B0E] p-3 rounded-xs border border-white/[0.06]">
-          <span className="text-[9px] text-neutral-500 uppercase block">RUBBER LOSS RATE</span>
+        <div className="bg-[#090C12] p-3 rounded-xs border border-white/[0.1]">
+          <span className="text-[9px] text-neutral-400 uppercase block font-bold">RUBBER LOSS RATE</span>
           <strong className="text-xl font-bold text-[#00E676] mt-0.5 block">
             {currentSpec.rubber_loss_um}
           </strong>
-          <span className="text-[9px] text-neutral-400">Graining Risk: {currentSpec.graining_risk}</span>
+          <span className="text-[10px] text-neutral-300">Graining Risk: {currentSpec.graining_risk}</span>
         </div>
       </div>
 

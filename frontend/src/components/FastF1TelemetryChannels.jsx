@@ -84,27 +84,27 @@ export default function FastF1TelemetryChannels({ trackId = 'monaco', trackName 
   return (
     <div className="f1-card p-5 flex flex-col gap-4">
       {/* Telemetry Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between border-b border-white/[0.08] pb-3 gap-3">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between border-b border-white/[0.1] pb-3 gap-3">
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 bg-[#FF1801] inline-block shadow-[0_0_8px_#FF1801] animate-pulse" />
             <h3 className="font-f1 text-xl font-bold text-white tracking-wider">
-              FastF1 High-Frequency Synchronized Telemetry Channels
+              1. FASTF1 CHANNEL TRACES &bull; 10Hz CAN-BUS TELEMETRY
             </h3>
             <span className="text-[10px] font-mono px-2 py-0.5 bg-[#FF1801]/20 text-[#FF2B16] border border-[#FF1801]/40 font-bold rounded-xs">
-              0.1s TELEMETRY SAMPLING
+              FIA SECU DIRECT INGESTION
             </span>
           </div>
-          <p className="text-xs font-mono text-neutral-400 mt-0.5">
-            Head-to-head lap trace comparing <strong className="text-white">{trackTelemetry.driver1}</strong> ({trackTelemetry.d1_lap}) vs <strong className="text-cyan-400">{trackTelemetry.driver2}</strong> ({trackTelemetry.d2_lap})
+          <p className="text-xs font-mono text-neutral-300 mt-1">
+            Synchronized telemetry lap trace comparing <strong className="text-white font-bold">{trackTelemetry.driver1}</strong> ({trackTelemetry.d1_lap}) vs <strong className="text-cyan-400 font-bold">{trackTelemetry.driver2}</strong> ({trackTelemetry.d2_lap}) &bull; Sample rate: 10Hz
           </p>
         </div>
 
         {/* Channel Filters */}
         <div className="flex items-center gap-2 font-mono text-xs">
-          <span className="text-neutral-500 text-[10px] uppercase font-bold">TELEMETRY VIEW:</span>
+          <span className="text-neutral-400 text-[10px] uppercase font-bold">TELEMETRY VIEW:</span>
           {[
-            { id: 'ALL', label: 'FULL STACK' },
+            { id: 'ALL', label: 'FULL STACK (ALL CHANNELS)' },
             { id: 'SPEED', label: 'SPEED (KM/H)' },
             { id: 'PEDALS', label: 'THROTTLE / BRAKE' },
             { id: 'GEAR', label: 'GEAR / RPM / G' }
@@ -112,10 +112,10 @@ export default function FastF1TelemetryChannels({ trackId = 'monaco', trackName 
             <button
               key={f.id}
               onClick={() => setActiveChannel(f.id)}
-              className={`px-3 py-1 font-bold uppercase rounded-xs transition-all cursor-pointer ${
+              className={`px-3 py-1.5 font-bold uppercase rounded-xs transition-all cursor-pointer ${
                 activeChannel === f.id
-                  ? 'bg-[#FF1801] text-black font-extrabold shadow-[0_0_10px_rgba(255,24,1,0.5)]'
-                  : 'bg-[#0E1015] border border-white/[0.08] text-neutral-400 hover:text-white'
+                  ? 'bg-[#FF1801] text-black font-black shadow-[0_0_12px_rgba(255,24,1,0.6)]'
+                  : 'bg-[#0E121A] border border-white/[0.15] text-neutral-300 hover:text-white hover:border-neutral-400'
               }`}
             >
               {f.label}
@@ -125,31 +125,31 @@ export default function FastF1TelemetryChannels({ trackId = 'monaco', trackName 
       </div>
 
       {/* Real-Time Telemetry Data Strip (Scrubbed Point) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 bg-[#080A0E] border border-white/[0.08] p-3 rounded-xs font-mono text-xs">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 bg-[#090C12] border border-white/[0.12] p-3 rounded-xs font-mono text-xs">
         <div>
-          <span className="text-[9px] text-neutral-500 block uppercase font-bold">DISTANCE</span>
-          <strong className="text-white text-sm">{currentDisplay.dist || 0} m</strong>
+          <span className="text-[9px] text-neutral-400 block uppercase font-bold">DISTANCE ALONG LAP</span>
+          <strong className="text-white text-sm font-bold">{currentDisplay.dist || 0} m</strong>
         </div>
         <div>
-          <span className="text-[9px] text-neutral-500 block uppercase font-bold">VER SPEED (RED BULL)</span>
-          <strong className="text-[#FF1801] text-sm">{currentDisplay.speed_d1 || 0} km/h</strong>
+          <span className="text-[9px] text-neutral-400 block uppercase font-bold">{trackTelemetry.driver1} SPEED</span>
+          <strong className="text-[#FF1801] text-sm font-bold">{currentDisplay.speed_d1 || 0} km/h</strong>
         </div>
         <div>
-          <span className="text-[9px] text-neutral-500 block uppercase font-bold">CHASER SPEED</span>
-          <strong className="text-cyan-400 text-sm">{currentDisplay.speed_d2 || 0} km/h</strong>
+          <span className="text-[9px] text-neutral-400 block uppercase font-bold">{trackTelemetry.driver2} SPEED</span>
+          <strong className="text-cyan-400 text-sm font-bold">{currentDisplay.speed_d2 || 0} km/h</strong>
         </div>
         <div>
-          <span className="text-[9px] text-neutral-500 block uppercase font-bold">THROTTLE / BRAKE</span>
-          <strong className="text-[#00E676]">{currentDisplay.throttle_d1 || 0}%</strong> / <strong className="text-[#FF1801]">{currentDisplay.brake_d1 || 0}%</strong>
+          <span className="text-[9px] text-neutral-400 block uppercase font-bold">THROTTLE / BRAKE</span>
+          <strong className="text-[#00E676] font-bold">{currentDisplay.throttle_d1 || 0}%</strong> / <strong className="text-[#FF1801] font-bold">{currentDisplay.brake_d1 || 0}%</strong>
         </div>
         <div>
-          <span className="text-[9px] text-neutral-500 block uppercase font-bold">GEAR / RPM</span>
-          <strong className="text-amber-400">G{currentDisplay.gear_d1 || 7}</strong> &bull; <span className="text-neutral-300">{currentDisplay.rpm_d1 || 11200}</span>
+          <span className="text-[9px] text-neutral-400 block uppercase font-bold">GEAR / RPM</span>
+          <strong className="text-amber-400 font-bold">G{currentDisplay.gear_d1 || 7}</strong> &bull; <span className="text-neutral-200">{currentDisplay.rpm_d1 || 11200}</span>
         </div>
         <div>
-          <span className="text-[9px] text-neutral-500 block uppercase font-bold">DRS / APEX</span>
-          <strong className={currentDisplay.drs_d1 ? 'text-[#00E676]' : 'text-neutral-500'}>
-            {currentDisplay.corner ? currentDisplay.corner : currentDisplay.drs_d1 ? 'DRS OPEN' : 'NORMAL'}
+          <span className="text-[9px] text-neutral-400 block uppercase font-bold">DRS / SECTOR APEX</span>
+          <strong className={currentDisplay.drs_d1 ? 'text-[#00E676] font-bold' : 'text-neutral-400 font-bold'}>
+            {currentDisplay.corner ? currentDisplay.corner : currentDisplay.drs_d1 ? 'DRS ACTIVE' : 'DRS CLOSED'}
           </strong>
         </div>
       </div>
@@ -157,17 +157,17 @@ export default function FastF1TelemetryChannels({ trackId = 'monaco', trackName 
       {/* CHANNEL 1: SPEED OVERLAY */}
       {(activeChannel === 'ALL' || activeChannel === 'SPEED') && (
         <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between text-xs font-mono text-neutral-400">
+          <div className="flex items-center justify-between text-xs font-mono text-neutral-300">
             <span className="flex items-center gap-2">
-              <strong className="text-white font-f1 uppercase">CHANNEL 1 &bull; VEHICLE SPEED (KM/H)</strong>
-              <span className="text-[10px] text-neutral-500">FastF1 Pitot Tube &amp; Wheel Speed Sensors</span>
+              <strong className="text-white font-f1 uppercase tracking-wide">CHANNEL 1 &bull; VEHICLE SPEED (KM/H)</strong>
+              <span className="text-[10px] text-neutral-400">FastF1 Pitot Tube &amp; Hall-Effect Wheel Speed Sensors</span>
             </span>
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1.5 text-white font-bold">
-                <span className="w-3 h-0.5 bg-[#FF1801]" /> VERSTAPPEN
+                <span className="w-3 h-0.5 bg-[#FF1801]" /> {trackTelemetry.driver1}
               </span>
               <span className="flex items-center gap-1.5 text-cyan-400 font-bold">
-                <span className="w-3 h-0.5 bg-cyan-400" /> CHASER
+                <span className="w-3 h-0.5 bg-cyan-400" /> {trackTelemetry.driver2}
               </span>
             </div>
           </div>
@@ -184,11 +184,11 @@ export default function FastF1TelemetryChannels({ trackId = 'monaco', trackName 
                 }}
               >
                 <CartesianGrid strokeDasharray="2 2" stroke="#141824" />
-                <XAxis dataKey="dist" unit="m" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'JetBrains Mono' }} />
-                <YAxis domain={['dataMin - 15', 'dataMax + 10']} unit=" km/h" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'JetBrains Mono' }} />
+                <XAxis dataKey="dist" unit="m" stroke="#555" tick={{ fill: '#888', fontSize: 10, fontFamily: 'JetBrains Mono' }} />
+                <YAxis domain={['dataMin - 15', 'dataMax + 10']} unit=" km/h" stroke="#555" tick={{ fill: '#888', fontSize: 10, fontFamily: 'JetBrains Mono' }} />
                 <Tooltip content={<CustomTelemetryTooltip />} />
-                <Line type="monotone" dataKey="speed_d1" name="Verstappen" stroke="#FF1801" strokeWidth={2.2} dot={false} isAnimationActive={false} />
-                <Line type="monotone" dataKey="speed_d2" name="Chaser" stroke="#00D2BE" strokeWidth={1.8} strokeDasharray="3 3" dot={false} isAnimationActive={false} />
+                <Line type="monotone" dataKey="speed_d1" name={trackTelemetry.driver1} stroke="#FF1801" strokeWidth={2.2} dot={false} isAnimationActive={false} />
+                <Line type="monotone" dataKey="speed_d2" name={trackTelemetry.driver2} stroke="#00D2BE" strokeWidth={1.8} strokeDasharray="3 3" dot={false} isAnimationActive={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -198,10 +198,10 @@ export default function FastF1TelemetryChannels({ trackId = 'monaco', trackName 
       {/* CHANNEL 2: THROTTLE & BRAKE PEDALS */}
       {(activeChannel === 'ALL' || activeChannel === 'PEDALS') && (
         <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between text-xs font-mono text-neutral-400">
+          <div className="flex items-center justify-between text-xs font-mono text-neutral-300">
             <span className="flex items-center gap-2">
-              <strong className="text-white font-f1 uppercase">CHANNEL 2 &bull; THROTTLE (%) &amp; BRAKE PRESSURE (%)</strong>
-              <span className="text-[10px] text-neutral-500">ECU Drive-by-Wire Potentiometer &amp; Hydraulic Pressure</span>
+              <strong className="text-white font-f1 uppercase tracking-wide">CHANNEL 2 &bull; THROTTLE (%) &amp; HYDRAULIC BRAKE PRESSURE (%)</strong>
+              <span className="text-[10px] text-neutral-400">ECU Drive-by-Wire Linear Potentiometer &amp; Dual Master Cylinders</span>
             </span>
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1.5 text-[#00E676] font-bold">
@@ -225,8 +225,8 @@ export default function FastF1TelemetryChannels({ trackId = 'monaco', trackName 
                 }}
               >
                 <CartesianGrid strokeDasharray="2 2" stroke="#141824" />
-                <XAxis dataKey="dist" unit="m" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'JetBrains Mono' }} />
-                <YAxis domain={[0, 100]} unit="%" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'JetBrains Mono' }} />
+                <XAxis dataKey="dist" unit="m" stroke="#555" tick={{ fill: '#888', fontSize: 10, fontFamily: 'JetBrains Mono' }} />
+                <YAxis domain={[0, 100]} unit="%" stroke="#555" tick={{ fill: '#888', fontSize: 10, fontFamily: 'JetBrains Mono' }} />
                 <Tooltip content={<CustomTelemetryTooltip />} />
                 <Area type="monotone" dataKey="throttle_d1" name="Throttle" stroke="#00E676" fill="#00E676" fillOpacity={0.18} strokeWidth={1.8} isAnimationActive={false} />
                 <Area type="monotone" dataKey="brake_d1" name="Brake" stroke="#FF1801" fill="#FF1801" fillOpacity={0.35} strokeWidth={1.8} isAnimationActive={false} />
@@ -239,17 +239,17 @@ export default function FastF1TelemetryChannels({ trackId = 'monaco', trackName 
       {/* CHANNEL 3: GEAR, RPM & LATERAL G */}
       {(activeChannel === 'ALL' || activeChannel === 'GEAR') && (
         <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between text-xs font-mono text-neutral-400">
+          <div className="flex items-center justify-between text-xs font-mono text-neutral-300">
             <span className="flex items-center gap-2">
-              <strong className="text-white font-f1 uppercase">CHANNEL 3 &bull; GEAR SELECTION &amp; LATERAL G ACCELERATION</strong>
-              <span className="text-[10px] text-neutral-500">Seamless-Shift 8-Speed Gearbox &amp; IMU Accelerometer</span>
+              <strong className="text-white font-f1 uppercase tracking-wide">CHANNEL 3 &bull; GEAR RATIO (1-8) &amp; IMU LATERAL LOAD (G)</strong>
+              <span className="text-[10px] text-neutral-400">Seamless-Shift Transmission &amp; 3-Axis Accelerometer</span>
             </span>
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1.5 text-amber-400 font-bold">
                 <span className="w-3 h-0.5 bg-amber-400" /> GEAR (1-8)
               </span>
               <span className="flex items-center gap-1.5 text-purple-400 font-bold">
-                <span className="w-3 h-0.5 bg-purple-400" /> LATERAL G-LOAD
+                <span className="w-3 h-0.5 bg-purple-400" /> LATERAL G-FORCE
               </span>
             </div>
           </div>
@@ -266,8 +266,8 @@ export default function FastF1TelemetryChannels({ trackId = 'monaco', trackName 
                 }}
               >
                 <CartesianGrid strokeDasharray="2 2" stroke="#141824" />
-                <XAxis dataKey="dist" unit="m" stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'JetBrains Mono' }} />
-                <YAxis domain={[0, 8]} ticks={[1, 2, 3, 4, 5, 6, 7, 8]} stroke="#555" tick={{ fill: '#777', fontSize: 10, fontFamily: 'JetBrains Mono' }} />
+                <XAxis dataKey="dist" unit="m" stroke="#555" tick={{ fill: '#888', fontSize: 10, fontFamily: 'JetBrains Mono' }} />
+                <YAxis domain={[0, 8]} ticks={[1, 2, 3, 4, 5, 6, 7, 8]} stroke="#555" tick={{ fill: '#888', fontSize: 10, fontFamily: 'JetBrains Mono' }} />
                 <Tooltip content={<CustomTelemetryTooltip />} />
                 <Line type="stepAfter" dataKey="gear_d1" name="Gear" stroke="#FFD700" strokeWidth={2} dot={false} isAnimationActive={false} />
                 <Line type="monotone" dataKey="lat_g" name="Lateral G" stroke="#B026FF" strokeWidth={1.5} dot={false} isAnimationActive={false} />

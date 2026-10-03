@@ -61,25 +61,25 @@ export default function UndercutOvercutSimulator({ trackMeta, degData }) {
   return (
     <div className="f1-card p-5 flex flex-col gap-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-3 gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.1] pb-3 gap-2">
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 bg-[#FF1801] inline-block shadow-[0_0_8px_#FF1801]" />
             <h3 className="font-f1 text-xl font-bold text-white tracking-wider">
-              Tactical Undercut vs. Overcut Trajectory Solver
+              3. UNDERCUT / OVERCUT SOLVER &bull; PIT WINDOW CROSSOVER
             </h3>
           </div>
-          <p className="text-xs font-mono text-neutral-400 mt-0.5">
-            Real-time track position solver calculating out-lap tire warmup deltas against rival degradation slope
+          <p className="text-xs font-mono text-neutral-300 mt-1">
+            Real-time track position crossover solver evaluating out-lap tire warmup deltas against rival degradation slope and pit transit loss
           </p>
         </div>
 
         <span className={`px-3 py-1 font-mono text-xs font-bold uppercase rounded-xs border ${
           simulation.isUndercutViable
-            ? 'bg-[#00E676]/15 border-[#00E676]/50 text-[#00E676]'
-            : 'bg-[#FF9100]/15 border-[#FF9100]/50 text-[#FF9100]'
+            ? 'bg-[#00E676]/20 border-[#00E676] text-[#00E676] shadow-[0_0_10px_rgba(0,230,118,0.3)]'
+            : 'bg-[#FF9100]/20 border-[#FF9100] text-[#FF9100] shadow-[0_0_10px_rgba(255,145,0,0.3)]'
         }`}>
-          {simulation.isUndercutViable ? 'UNDERCUT HIGHLY VIABLE' : 'OVERCUT / EXTEND RECOMMENDED'}
+          {simulation.isUndercutViable ? 'UNDERCUT PROFILE OPTIMAL' : 'OVERCUT / EXTEND RECOMMENDED'}
         </span>
       </div>
 
