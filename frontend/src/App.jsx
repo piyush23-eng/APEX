@@ -1,5 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import Circuit3D from './components/Circuit3D';
+import FastF1TelemetryChannels from './components/FastF1TelemetryChannels';
+import LiveTimingTower from './components/LiveTimingTower';
+import UndercutOvercutSimulator from './components/UndercutOvercutSimulator';
+import TireThermalTelemetry from './components/TireThermalTelemetry';
 import TelemetryHub from './components/TelemetryHub';
 import {
   Activity,
@@ -22,7 +25,11 @@ import {
   Play,
   RotateCcw,
   Sparkles,
-  X
+  X,
+  Clock,
+  Compass,
+  Zap,
+  BarChart3
 } from 'lucide-react';
 import f1Data from './f1_api_data.json';
 
@@ -39,6 +46,7 @@ export default function App() {
   const [selectedTrackId, setSelectedTrackId] = useState('monaco');
   const [selectedRank, setSelectedRank] = useState(1);
   const [raceFlag, setRaceFlag] = useState('GREEN'); // 'GREEN' | 'SC' | 'VSC' | 'RED'
+  const [primaryTelemetryTab, setPrimaryTelemetryTab] = useState('CHANNELS'); // 'CHANNELS' | 'TIMING' | 'UNDERCUT' | 'TIRES'
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [showWhitepaperModal, setShowWhitepaperModal] = useState(false);
 
@@ -50,7 +58,7 @@ export default function App() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [radioIdx, setRadioIdx] = useState(0);
 
-  // Cycle radio messages every 8 seconds
+  // Cycle radio messages every 7 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       setRadioIdx(prev => (prev + 1) % RADIO_MESSAGES.length);
@@ -400,14 +408,69 @@ export default function App() {
           </div>
         )}
 
-        {/* 3D Dynamic Circuit Spline Hero */}
-        <section>
-          <Circuit3D
-            trackId={selectedTrackId}
-            trackName={currentTrackMeta.name}
-            pitLap={optimalPitLap}
-            tireCompound={optimalCompound}
-          />
+        {/* PRIMARY TELEMETRY CONSOLE (Replacing 3D with authentic pit-wall telemetry modules) */}
+        <section className="flex flex-col gap-4">
+          {/* Telemetry Switcher Tabs */}
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.08] pb-2">
+            <div className="flex items-center gap-2">
+              {[
+                { id: 'CHANNELS', label: '1. FastF1 Channel Traces', icon: Activity },
+                { id: 'TIMING', label: '2. Live Timing & Sector Matrix', icon: Clock },
+                { id: 'UNDERCUT', label: '3. Undercut / Overcut Solver', icon: Zap },
+                { id: 'TIRES', label: '4. Pirelli Compound Physics', icon: Flame }
+              ].map(t => {
+                const Icon = t.icon;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setPrimaryTelemetryTab(t.id)}
+                    className={`flex items-center gap-2 px-4 py-2 font-mono text-xs font-bold uppercase transition-all rounded-xs cursor-pointer ${
+                      primaryTelemetryTab === t.id
+                        ? 'bg-white text-black font-extrabold shadow-[0_0_15px_rgba(255,255,255,0.4)]'
+                        : 'bg-[#0E1015] border border-white/[0.08] text-neutral-400 hover:text-white hover:border-white/[0.2]'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{t.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center gap-2 text-xs font-mono text-neutral-400">
+              <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" />
+              <span>LIVE TELEMETRY STREAM: <strong className="text-white">ACTIVE</strong></span>
+            </div>
+          </div>
+
+          {/* Active Telemetry Component View */}
+          {primaryTelemetryTab === 'CHANNELS' && (
+            <FastF1TelemetryChannels
+              trackId={selectedTrackId}
+              trackName={currentTrackMeta.name}
+            />
+          )}
+
+          {primaryTelemetryTab === 'TIMING' && (
+            <LiveTimingTower
+              trackId={selectedTrackId}
+              trackName={currentTrackMeta.name}
+            />
+          )}
+
+          {primaryTelemetryTab === 'UNDERCUT' && (
+            <UndercutOvercutSimulator
+              trackMeta={currentTrackMeta}
+              degData={degData}
+            />
+          )}
+
+          {primaryTelemetryTab === 'TIRES' && (
+            <TireThermalTelemetry
+              trackId={selectedTrackId}
+              trackMeta={currentTrackMeta}
+            />
+          )}
         </section>
 
         {/* Integrated Telemetry Hub (Strategy Deck, Tire Signal, Lap Gap, Benchmark) */}
