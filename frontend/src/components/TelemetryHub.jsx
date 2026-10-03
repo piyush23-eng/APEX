@@ -1,0 +1,551 @@
+import React, { useState } from 'react';
+import {
+  ScatterChart,
+  Scatter,
+  XAxis,
+  YAxis,
+  ZAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  BarChart,
+  Bar,
+  Cell,
+  LineChart,
+  Line,
+  ReferenceLine
+} from 'recharts';
+import {
+  Activity,
+  Layers,
+  Clock,
+  ShieldAlert,
+  Flame,
+  Gauge,
+  TrendingDown,
+  CheckCircle2,
+  AlertTriangle,
+  Info,
+  Zap,
+  Filter,
+  BarChart2,
+  Compass
+} from 'lucide-react';
+
+const COMPOUND_COLORS = {
+  SOFT: '#E10600',
+  MEDIUM: '#FFD700',
+  HARD: '#FFFFFF'
+};
+
+const CustomScatterTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const d = payload[0].payload;
+    return (
+      <div className="bg-[#0c0e14] border border-[#262a36] p-2.5 font-mono text-xs shadow-2xl rounded-xs">
+        <div className="flex items-center gap-2 mb-1 border-b border-[#1b1f28] pb-1">
+          <span
+            className="w-2.5 h-2.5 rounded-full"
+            style={{ backgroundColor: COMPOUND_COLORS[d.compound] }}
+          />
+          <strong className="text-white uppercase">{d.compound}</strong>
+          <span className="text-neutral-500">#{d.driver}</span>
+        </div>
+        <div className="text-neutral-300">Stint Age: <strong className="text-white">{d.tyre_life} Laps</strong></div>
+        <div className="text-neutral-300">Normalized Pace: <strong className="text-white">{d.lap_time.toFixed(3)}s</strong></div>
+        <div className="text-[10px] text-neutral-500">FastF1 Lap #{d.lap_number}</div>
+      </div>
+    );
+  }
+  return null;
+};
+
+export default function TelemetryHub({
+  trackMeta,
+  degData,
+  simData,
+  valData,
+  selectedRank,
+  onSelectRank
+}) {
+  const [activeSubTab, setActiveSubTab] = useState('STRATEGY_DECK'); // 'STRATEGY_DECK', 'TIRE_SIGNAL', 'GAP_DELTA', 'VALIDATION'
+  const [compoundFilter, setCompoundFilter] = useState('ALL');
+
+  const strategies = simData?.strategies || [];
+  const models = degData?.models || {};
+  const scatter = degData?.scatter_points || [];
+
+  // Filtered scatter points
+  const filteredScatter = compoundFilter === 'ALL'
+    ? scatter
+    : scatter.filter(p => p.compound === compoundFilter);
+
+  // Active strategy
+  const activeStrat = strategies.find(s => s.rank === selectedRank) || strategies[0];
+
+  // Cumulative Lap Delta Calculation for Gap Chart
+  const paceDeltaData = React.useMemo(() => {
+    if (strategies.length < 2) return [];
+    const p1 = strategies[0];
+    const p2 = strategies[1];
+    const pAlt = strategies.find(s => s.stops === 2) || strategies[2];
+    if (!p1 || !p2 || !pAlt) return [];
+
+    const getLapTime = (strat, lap) => {
+      let lapInStint = 0;
+      let acc = 0;
+      let comp = 'MEDIUM';
+      for (const st of strat.stints) {
+        if (lap <= acc + st.length) {
+          comp = st.compound;
+          lapInStint = lap - acc;
+          break;
+        }
+        acc += st.length;
+      }
+      const m = models[comp] || { intercept: 80, slope: 0.03 };
+      let t = m.intercept + m.slope * lapInStint - (lap - 1) * trackMeta.fuel_burn_rate;
+      if (strat.pit_laps.includes(lap)) t += trackMeta.green_pit_loss;
+      return t;
+    };
+
+    const data = [];
+    let cum1 = 0, cum2 = 0, cumAlt = 0;
+    for (let l = 1; l <= trackMeta.laps; l++) {
+      cum1 += getLapTime(p1, l);
+      cum2 += getLapTime(p2, l);
+      cumAlt += getLapTime(pAlt, l);
+      data.push({
+        lap: l,
+        p1_delta: 0,
+        p2_delta: Number((cum2 - cum1).toFixed(2)),
+        alt_delta: Number((cumAlt - cum1).toFixed(2))
+      });
+    }
+    return data;
+  }, [strategies, models, trackMeta]);
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Sub-navigation Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1c202a] pb-3">
+        <div className="flex items-center gap-2">
+          {[
+            { id: 'STRATEGY_DECK', label: '1. Monte Carlo Strategy Deck' },
+            { id: 'TIRE_SIGNAL', label: '2. Tire Degradation Signal' },
+            { id: 'GAP_DELTA', label: '3. Lap-by-Lap Gap Telemetry' },
+            { id: 'VALIDATION', label: '4. Ground-Truth Benchmark' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSubTab(tab.id)}
+              className={`px-3.5 py-1.5 font-mono text-xs font-bold uppercase transition-all rounded-xs cursor-pointer ${
+                activeSubTab === tab.id
+                  ? 'bg-[#E10600] text-black font-extrabold shadow-sm'
+                  : 'bg-[#0E1015] border border-[#212530] text-neutral-400 hover:text-white hover:border-[#383d4c]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-3 text-xs font-mono text-neutral-400">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" /> SIMULATION N=1,000
+          </span>
+          <span className="text-neutral-600">|</span>
+          <span>FUEL BIAS: -{trackMeta.fuel_burn_rate}s/lap</span>
+        </div>
+      </div>
+
+      {/* VIEW 1: STRATEGY DECK (Gantt + Ranked Table + Delta Bars) */}
+      {activeSubTab === 'STRATEGY_DECK' && (
+        <div className="flex flex-col gap-6">
+          {/* Visual Stint Gantt Timeline */}
+          <div className="f1-card p-5 flex flex-col gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#21242e] pb-3 gap-2">
+              <div>
+                <h3 className="font-f1 text-lg font-bold text-white tracking-wider">
+                  Stint Life &amp; Mandatory Pit Windows (Gantt Architecture)
+                </h3>
+                <p className="text-xs font-mono text-neutral-400 mt-0.5">
+                  Proportional tire age duration, cross-over thresholds, and box laps across all 10 candidates
+                </p>
+              </div>
+              <div className="flex items-center gap-3 text-xs font-mono">
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#E10600]" /> SOFT</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#FFD700]" /> MEDIUM</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-white" /> HARD</span>
+              </div>
+            </div>
+
+            {/* Gantt Rows */}
+            <div className="flex flex-col gap-2 pt-1">
+              {strategies.map((strat) => {
+                const isSelected = strat.rank === selectedRank;
+                const isP1 = strat.rank === 1;
+
+                return (
+                  <div
+                    key={strat.rank}
+                    onClick={() => onSelectRank(strat.rank)}
+                    className={`flex items-center p-2 rounded-xs border transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#181C25] border-[#E10600] shadow-md'
+                        : 'bg-[#0B0D12] border-[#1c1f28] hover:border-[#383d4c]'
+                    }`}
+                  >
+                    <div className="w-44 flex items-center gap-2.5 shrink-0">
+                      <span className={`w-6 h-6 flex items-center justify-center font-mono font-bold text-xs rounded-xs ${
+                        isP1 ? 'bg-[#E10600] text-black font-extrabold' : 'bg-[#181A22] text-neutral-300'
+                      }`}>
+                        #{strat.rank}
+                      </span>
+                      <div className="flex flex-col truncate">
+                        <span className="font-f1 text-xs font-bold text-white truncate">
+                          {strat.name.replace('1-Stop: ', '1S: ').replace('2-Stop: ', '2S: ')}
+                        </span>
+                        <span className="text-[10px] font-mono text-neutral-400">
+                          {strat.delta_to_best === 0 ? 'P1 OPTIMAL' : `+${strat.delta_to_best.toFixed(2)}s`}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Stint Ribbons */}
+                    <div className="flex-1 ml-4 h-7 bg-[#060709] rounded-xs relative flex items-center overflow-hidden border border-[#1b1e28]">
+                      {strat.stints.map((st, sIdx) => {
+                        const width = (st.length / trackMeta.laps) * 100;
+                        const cColor = COMPOUND_COLORS[st.compound] || '#fff';
+                        return (
+                          <div
+                            key={sIdx}
+                            style={{
+                              width: `${width}%`,
+                              backgroundColor: `${cColor}22`,
+                              borderColor: cColor
+                            }}
+                            className="h-full border-r relative flex items-center justify-center px-1"
+                          >
+                            <span
+                              style={{ color: cColor }}
+                              className="font-mono text-[11px] font-bold truncate"
+                            >
+                              {st.compound[0]} &bull; {st.length}L
+                            </span>
+                          </div>
+                        );
+                      })}
+
+                      {/* Pit stop flags */}
+                      {strat.pit_laps.map((lap, pIdx) => {
+                        const left = (lap / trackMeta.laps) * 100;
+                        return (
+                          <div
+                            key={pIdx}
+                            style={{ left: `${left}%` }}
+                            className="absolute top-0 bottom-0 w-1 bg-white flex items-center justify-center"
+                          >
+                            <span className="absolute -top-3.5 bg-black text-[9px] font-mono text-white px-1 border border-neutral-700 rounded-xs">
+                              L{lap}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Strategy Leaderboard Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {strategies.map((strat) => {
+              const isSelected = strat.rank === selectedRank;
+              const isP1 = strat.rank === 1;
+
+              return (
+                <div
+                  key={strat.rank}
+                  onClick={() => onSelectRank(strat.rank)}
+                  className={`f1-card p-4 flex flex-col justify-between cursor-pointer transition-all ${
+                    isSelected ? 'f1-card-active' : 'hover:border-[#383d4c]'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between border-b border-[#1b1e26] pb-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-6 h-6 flex items-center justify-center font-mono font-bold text-xs rounded-xs ${
+                          isP1 ? 'bg-[#E10600] text-black font-extrabold' : 'bg-[#191C24] text-neutral-300'
+                        }`}>
+                          #{strat.rank}
+                        </span>
+                        <span className="font-f1 text-base font-bold text-white tracking-wide">
+                          {strat.name}
+                        </span>
+                      </div>
+                      <span className={`font-mono text-xs font-bold ${strat.delta_to_best === 0 ? 'text-emerald-400' : 'text-neutral-300'}`}>
+                        {strat.delta_to_best === 0 ? 'P1 BENCHMARK' : `+${strat.delta_to_best.toFixed(2)}s`}
+                      </span>
+                    </div>
+
+                    {/* Stint Pills */}
+                    <div className="flex items-center gap-2 mb-3">
+                      {strat.stints.map((st, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-1.5 px-2 py-0.5 bg-[#0B0C10] border border-[#21242e] text-xs font-mono rounded-xs"
+                        >
+                          <span
+                            className="w-2.5 h-2.5 rounded-full"
+                            style={{ backgroundColor: COMPOUND_COLORS[st.compound] }}
+                          />
+                          <span className="text-white font-bold">{st.compound}</span>
+                          <span className="text-neutral-400">({st.length}L)</span>
+                        </div>
+                      ))}
+                      <span className="text-xs font-mono text-neutral-500 ml-auto">
+                        Pit Laps: [{strat.pit_laps.join(', ')}]
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Quantitative Stats Bar */}
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#1a1d25] font-mono text-xs">
+                    <div>
+                      <div className="text-[10px] text-neutral-500">EXPECTED FINISH</div>
+                      <div className="text-white font-bold text-sm mt-0.5">{strat.formatted_mean}</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-neutral-500">IQR SPREAD</div>
+                      <div className="text-neutral-300 font-medium mt-0.5">&plusmn;{(strat.iqr / 2).toFixed(1)}s</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-neutral-500">SC BENEFIT PROB</div>
+                      <div className="text-amber-400 font-bold mt-0.5">{(strat.sc_benefit_prob * 100).toFixed(0)}%</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* VIEW 2: TIRE DEGRADATION SIGNAL */}
+      {activeSubTab === 'TIRE_SIGNAL' && (
+        <div className="flex flex-col gap-6">
+          {/* Filter Pills and Regression Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {['SOFT', 'MEDIUM', 'HARD'].map(comp => {
+              const m = models[comp];
+              if (!m) return null;
+              return (
+                <div key={comp} className="f1-card p-4 flex flex-col justify-between">
+                  <div className="flex items-center justify-between border-b border-[#1d2028] pb-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ backgroundColor: COMPOUND_COLORS[comp] }}
+                      />
+                      <span className="font-f1 text-base font-bold text-white tracking-wider">{comp}</span>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 bg-[#181B22] text-neutral-300 border border-[#252934]">
+                      N={m.sample_size} VALID LAPS
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between font-mono">
+                    <div>
+                      <div className="text-[10px] text-neutral-500 uppercase">DEGRADATION RATE (&alpha;)</div>
+                      <div className="text-2xl font-bold text-white mt-0.5">
+                        +{m.slope.toFixed(4)}<span className="text-xs text-neutral-400">s/lap</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[10px] text-neutral-500 uppercase">FIT SCORE (R&sup2;)</div>
+                      <div className="text-xl font-bold text-neutral-200 mt-0.5">{m.r2.toFixed(3)}</div>
+                    </div>
+                  </div>
+                  <div className="text-[10px] font-mono text-neutral-400 mt-2 pt-1 border-t border-[#181b22] flex justify-between">
+                    <span>Base Pace: {m.intercept.toFixed(2)}s</span>
+                    <span className="text-emerald-400 font-semibold">Fuel Corrected</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Scatter Chart */}
+          <div className="f1-card p-5 flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b border-[#21242e] pb-3">
+              <div>
+                <h3 className="font-f1 text-lg font-bold text-white tracking-wider">
+                  Raw FastF1 Telemetry Signal vs. Linear Degradation Fit
+                </h3>
+                <p className="text-xs font-mono text-neutral-400 mt-0.5">
+                  Normalized fuel-corrected lap times as a function of stint age. Outliers (&gt;2.5s) and safety car laps removed.
+                </p>
+              </div>
+
+              {/* Filter */}
+              <div className="flex items-center gap-2 font-mono text-xs">
+                {['ALL', 'SOFT', 'MEDIUM', 'HARD'].map(comp => (
+                  <button
+                    key={comp}
+                    onClick={() => setCompoundFilter(comp)}
+                    className={`px-3 py-1 font-bold uppercase rounded-xs cursor-pointer ${
+                      compoundFilter === comp
+                        ? 'bg-[#E10600] text-black'
+                        : 'bg-[#111319] text-neutral-400 border border-[#21242e]'
+                    }`}
+                  >
+                    {comp}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="w-full h-80 bg-[#08090C] border border-[#1b1e26] p-2 rounded-xs">
+              <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart margin={{ top: 15, right: 25, bottom: 20, left: 10 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#161820" />
+                  <XAxis
+                    type="number"
+                    dataKey="tyre_life"
+                    name="Stint Age"
+                    unit=" laps"
+                    stroke="#555"
+                    tick={{ fill: '#808080', fontSize: 11, fontFamily: 'JetBrains Mono' }}
+                    domain={[0, 48]}
+                  />
+                  <YAxis
+                    type="number"
+                    dataKey="lap_time"
+                    name="Pace"
+                    unit="s"
+                    stroke="#555"
+                    tick={{ fill: '#808080', fontSize: 11, fontFamily: 'JetBrains Mono' }}
+                    domain={['dataMin - 1', 'dataMax + 1']}
+                  />
+                  <ZAxis range={[20, 32]} />
+                  <Tooltip content={<CustomScatterTooltip />} />
+                  <Legend wrapperStyle={{ fontFamily: 'Chakra Petch', textTransform: 'uppercase', fontSize: 12 }} />
+
+                  {(compoundFilter === 'ALL' || compoundFilter === 'SOFT') && (
+                    <Scatter name="SOFT Laps" data={filteredScatter.filter(p => p.compound === 'SOFT')} fill="#E10600" opacity={0.7} />
+                  )}
+                  {(compoundFilter === 'ALL' || compoundFilter === 'MEDIUM') && (
+                    <Scatter name="MEDIUM Laps" data={filteredScatter.filter(p => p.compound === 'MEDIUM')} fill="#FFD700" opacity={0.7} />
+                  )}
+                  {(compoundFilter === 'ALL' || compoundFilter === 'HARD') && (
+                    <Scatter name="HARD Laps" data={filteredScatter.filter(p => p.compound === 'HARD')} fill="#FFFFFF" opacity={0.75} />
+                  )}
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* VIEW 3: GAP DELTA */}
+      {activeSubTab === 'GAP_DELTA' && (
+        <div className="f1-card p-5 flex flex-col gap-4">
+          <div className="border-b border-[#21242e] pb-3">
+            <h3 className="font-f1 text-lg font-bold text-white tracking-wider">
+              Simulated Head-to-Head Delta to P1 ({strategies[0]?.name})
+            </h3>
+            <p className="text-xs font-mono text-neutral-400 mt-0.5">
+              Cumulative race time differential. Negative values denote on-track leads; positive values denote time deficits.
+            </p>
+          </div>
+
+          <div className="w-full h-80 bg-[#08090C] border border-[#1b1e26] p-2 rounded-xs">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={paceDeltaData} margin={{ top: 15, right: 25, bottom: 15, left: 10 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#161820" />
+                <XAxis dataKey="lap" unit="L" stroke="#555" tick={{ fill: '#808080', fontSize: 11, fontFamily: 'JetBrains Mono' }} />
+                <YAxis unit="s" stroke="#555" tick={{ fill: '#808080', fontSize: 11, fontFamily: 'JetBrains Mono' }} />
+                <ReferenceLine y={0} stroke="#34d399" strokeDasharray="4 4" />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-[#0c0e14] border border-[#262a36] p-2.5 font-mono text-xs shadow-2xl rounded-xs">
+                          <div className="font-bold text-white mb-1">LAP #{label}</div>
+                          <div className="text-emerald-400">P1 Baseline: 0.00s</div>
+                          <div className="text-blue-400">P2 Gap: +{payload[0]?.value}s</div>
+                          <div className="text-amber-400">2-Stop Gap: +{payload[1]?.value}s</div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Line type="monotone" dataKey="p2_delta" name="P2 Contender" stroke="#60a5fa" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="alt_delta" name="2-Stop Alternate" stroke="#FFD700" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
+      {/* VIEW 4: VALIDATION BENCHMARK */}
+      {activeSubTab === 'VALIDATION' && valData && (
+        <div className="f1-card p-5 flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#21242e] pb-3 gap-2">
+            <div>
+              <h3 className="font-f1 text-lg font-bold text-white tracking-wider">
+                Ground-Truth Benchmark: {valData.track} ({valData.year})
+              </h3>
+              <p className="text-xs font-mono text-neutral-400 mt-0.5">
+                Evaluation of real team tactical decisions against Monte Carlo simulator rankings
+              </p>
+            </div>
+            <span className={`px-3 py-1 font-mono text-xs font-bold uppercase rounded-xs border ${
+              valData.model_match.rank === 1
+                ? 'bg-emerald-950/80 border-emerald-500/70 text-emerald-400'
+                : valData.model_match.rank <= 3
+                ? 'bg-blue-950/80 border-blue-500/70 text-blue-400'
+                : 'bg-amber-950/80 border-amber-500/70 text-amber-400'
+            }`}>
+              {valData.model_match.tier} &bull; Model Rank #{valData.model_match.rank}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-[#090B0E] border border-[#1b1e26] p-4 rounded-xs">
+              <div className="text-[10px] font-mono text-neutral-400 uppercase mb-1 font-semibold">ACTUAL RACE WINNER</div>
+              <div className="font-f1 text-2xl font-bold text-white mb-2">{valData.winner.driver} &bull; {valData.winner.team}</div>
+              <div className="flex items-center gap-2 mb-2">
+                {valData.winner.stints.map((st, i) => (
+                  <span key={i} className="px-2 py-0.5 bg-[#12141c] border border-[#21242e] text-xs font-mono text-white rounded-xs">
+                    {st.compound} ({st.length}L)
+                  </span>
+                ))}
+              </div>
+              <div className="text-xs font-mono text-neutral-400">Actual Pit Lap: <strong>{valData.winner.pit_laps.join(', ') || 'None'}</strong></div>
+            </div>
+
+            <div className="bg-[#090B0E] border border-[#1b1e26] p-4 rounded-xs">
+              <div className="text-[10px] font-mono text-neutral-400 uppercase mb-1 font-semibold">MODEL RANKED PREDICTION</div>
+              <div className="font-f1 text-xl font-bold text-[#E10600] mb-2">{valData.model_match.matched_strategy_name}</div>
+              <div className="text-xs font-mono text-neutral-300 mb-2">Pit Offset: <strong>{valData.model_match.pit_error_laps} Laps Delta</strong></div>
+              <div className="text-xs font-mono text-emerald-400">Sim Strategy Match: Rank #{valData.model_match.rank} of 10 Candidates</div>
+            </div>
+          </div>
+
+          <div className="bg-[#090B0E] border border-[#1b1e26] p-4 rounded-xs">
+            <div className="text-xs font-mono text-[#E10600] uppercase font-bold mb-1 flex items-center gap-1.5">
+              <Info className="w-3.5 h-3.5" /> RACING &amp; TELEMETRY DIAGNOSTIC WRITEUP
+            </div>
+            <p className="text-xs font-mono text-neutral-300 leading-relaxed">
+              {valData.analysis_writeup}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
