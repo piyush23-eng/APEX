@@ -243,75 +243,130 @@ export default function App() {
 
       {/* Main Container */}
       <main className="flex-1 p-6 max-w-7xl mx-auto w-full flex flex-col gap-6">
-        {/* Top Grand Prix Selector & Tactical KPI Deck */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="f1-card p-4 flex flex-col justify-between">
-            <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider font-semibold">
-              GRAND PRIX CIRCUIT TARGET
-            </span>
-            <select
-              value={selectedTrackId}
-              onChange={(e) => {
-                setSelectedTrackId(e.target.value);
-                setSelectedRank(1);
-              }}
-              className="bg-[#07080B] border border-white/[0.12] text-white font-f1 font-bold text-lg uppercase px-3 py-2 focus:outline-none focus:border-[#FF1801] mt-1.5 cursor-pointer rounded-xs"
-            >
-              {tracks.map(t => (
-                <option key={t.id} value={t.id}>
-                  {t.name} ({t.year})
-                </option>
-              ))}
-            </select>
+        {/* Top Grand Prix Selector Header Bar */}
+        <div className="f1-card p-5 border-l-4 border-l-[#FF1801] flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xs bg-[#FF1801]/20 border border-[#FF1801] flex items-center justify-center text-white shrink-0 shadow-[0_0_15px_rgba(255,24,1,0.4)]">
+              <Compass className="w-6 h-6 text-[#FF1801]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#FF1801] shadow-[0_0_8px_#FF1801]" />
+                <span className="text-xs font-mono text-white uppercase tracking-wider font-extrabold">
+                  GRAND PRIX CIRCUIT TARGET:
+                </span>
+                <span className="font-f1 text-white font-extrabold text-xl tracking-wide uppercase">
+                  {currentTrackMeta.name} ({currentTrackMeta.year})
+                </span>
+              </div>
+              <div className="text-xs font-mono text-neutral-300 mt-1">
+                {currentTrackMeta.track_type} &bull; <strong className="text-white">{currentTrackMeta.laps} LAPS</strong> ({currentTrackMeta.circuit_length_km} KM) &bull; GREEN PIT LOSS: <strong className="text-white">{currentTrackMeta.green_pit_loss}s</strong>
+              </div>
+            </div>
           </div>
 
+          {/* Dual Selection: 5 Direct Buttons + High-Visibility Dropdown */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            {/* Quick-Click Circuit Buttons */}
+            <div className="flex flex-wrap items-center gap-1.5 font-mono text-xs">
+              {tracks.map(t => {
+                const isSelected = t.id === selectedTrackId;
+                const flag = t.id === 'monaco' ? '🇲🇨' : t.id === 'hungary' ? '🇭🇺' : t.id === 'silverstone' ? '🇬🇧' : t.id === 'monza' ? '🇮🇹' : '🇧🇭';
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => {
+                      setSelectedTrackId(t.id);
+                      setSelectedRank(1);
+                    }}
+                    className={`px-3 py-2 font-bold uppercase rounded-xs transition-all cursor-pointer flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-[#FF1801] text-black font-extrabold shadow-[0_0_15px_rgba(255,24,1,0.6)] scale-[1.03]'
+                        : 'bg-[#0E121A] border border-white/[0.15] text-neutral-200 hover:text-white hover:border-[#FF1801]'
+                    }`}
+                  >
+                    <span>{flag}</span>
+                    <span>{t.race.toUpperCase()}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* High-Visibility Custom Select Fallback */}
+            <div className="w-full sm:w-56 shrink-0">
+              <select
+                value={selectedTrackId}
+                onChange={(e) => {
+                  setSelectedTrackId(e.target.value);
+                  setSelectedRank(1);
+                }}
+                className="f1-select"
+                aria-label="Grand Prix Circuit Target"
+              >
+                {tracks.map(t => {
+                  const flag = t.id === 'monaco' ? '🇲🇨' : t.id === 'hungary' ? '🇭🇺' : t.id === 'silverstone' ? '🇬🇧' : t.id === 'monza' ? '🇮🇹' : '🇧🇭';
+                  return (
+                    <option key={t.id} value={t.id}>
+                      {flag} {t.name.toUpperCase()} ({t.year})
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* 3-Column Tactical KPI Deck */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="f1-card p-4 flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider font-semibold">
+              <span className="text-xs font-mono text-neutral-300 uppercase tracking-wider font-bold">
                 SAFETY CAR PROBABILITY
               </span>
               <div className="font-mono text-3xl font-extrabold text-white mt-0.5">
                 {(scProbOverride * 100).toFixed(0)}<span className="text-[#FF1801] text-xl font-bold">%</span>
               </div>
-              <div className="text-[10px] font-mono text-neutral-500 mt-0.5">
-                Stochastic Deployment Window
+              <div className="text-xs font-mono text-neutral-400 mt-0.5">
+                Historical Deployment Window
               </div>
             </div>
-            <ShieldAlert className="w-8 h-8 text-[#FF1801] opacity-80" />
+            <ShieldAlert className="w-9 h-9 text-[#FF1801] opacity-90" />
           </div>
 
           <div className="f1-card p-4 flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider font-semibold">
+              <span className="text-xs font-mono text-neutral-300 uppercase tracking-wider font-bold">
                 ACTIVE PIT LOSS TRANSIT
               </span>
               <div className="font-mono text-3xl font-extrabold text-white mt-0.5">
-                {pitLossOverride.toFixed(1)}<span className="text-neutral-500 text-sm font-normal">s</span>
+                {pitLossOverride.toFixed(1)}<span className="text-neutral-400 text-sm font-normal">s</span>
               </div>
-              <div className="text-[10px] font-mono text-emerald-400 mt-0.5">
+              <div className="text-xs font-mono text-emerald-400 font-bold mt-0.5">
                 {raceFlag === 'GREEN' ? 'Full Racing Pace' : 'Under Safety Car Delta'}
               </div>
             </div>
-            <Gauge className="w-8 h-8 text-neutral-400 opacity-80" />
+            <Gauge className="w-9 h-9 text-neutral-300 opacity-90" />
           </div>
 
           <div className="f1-card p-4 flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider font-semibold">
+              <span className="text-xs font-mono text-neutral-300 uppercase tracking-wider font-bold">
                 RECOMMENDED COMPOUND
               </span>
               <div className="font-mono text-3xl font-extrabold text-white mt-0.5 flex items-center gap-2">
                 <span
-                  className="w-3.5 h-3.5 rounded-full inline-block shadow-sm"
+                  className="w-4 h-4 rounded-full inline-block shadow-md"
                   style={{
                     backgroundColor: optimalCompound === 'SOFT' ? '#FF1801' : optimalCompound === 'MEDIUM' ? '#FFF200' : '#FFFFFF'
                   }}
                 />
                 {optimalCompound}
               </div>
-              <div className="text-[10px] font-mono text-neutral-500 mt-0.5">Optimal Box Window: Lap {optimalPitLap}</div>
+              <div className="text-xs font-mono text-neutral-400 mt-0.5">
+                Optimal Box Window: <strong className="text-white">Lap {optimalPitLap}</strong>
+              </div>
             </div>
-            <Flame className="w-8 h-8 text-[#FF1801] opacity-80" />
+            <Flame className="w-9 h-9 text-[#FF1801] opacity-90" />
           </div>
         </div>
 
