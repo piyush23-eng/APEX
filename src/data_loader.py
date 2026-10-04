@@ -48,6 +48,14 @@ import os
 import argparse
 from pathlib import Path
 from typing import Optional, Tuple, Dict, Any
+import logging
+import warnings
+
+# Suppress network fallback logs when using local FastF1 cache
+warnings.filterwarnings("ignore")
+logging.getLogger("urllib3").setLevel(logging.CRITICAL)
+logging.getLogger("requests_cache").setLevel(logging.CRITICAL)
+logging.getLogger("fastf1.req").setLevel(logging.CRITICAL)
 
 import pandas as pd
 import numpy as np

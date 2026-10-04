@@ -286,3 +286,15 @@ def get_validation_data(track: str = Query("monaco")):
         },
         "analysis_writeup": val_meta["writeup"]
     }
+
+
+@app.get("/aerodynamics")
+def get_aerodynamics_data(track: str = Query("monaco")):
+    """Returns aerodynamic downforce, drag, DRS efficiency, and dirty-air wake decay parameters."""
+    track_key = track.lower()
+    if track_key not in TRACKS_METADATA:
+        raise HTTPException(status_code=404, detail=f"Unknown track '{track}'")
+    from pipeline.aero_performance_model import AeroVehiclePerformanceModel
+    aero = AeroVehiclePerformanceModel(track_id=track_key)
+    return aero.get_circuit_aero_summary()
+

@@ -7,7 +7,8 @@ import {
   TrendingDown,
   Layers,
   Zap,
-  Info
+  Info,
+  Wind
 } from 'lucide-react';
 import extData from '../telemetry_extended_data.json';
 
@@ -20,17 +21,22 @@ const COMPOUND_COLORS = {
 export default function TireThermalTelemetry({ trackId = 'monaco', trackMeta }) {
   const [selectedComp, setSelectedComp] = useState('MEDIUM');
   const [simLapAge, setSimLapAge] = useState(18);
+  const [followGap, setFollowGap] = useState(1.0); // Following interval behind leading car (s)
 
   const specs = extData.tire_specs[trackId] || extData.tire_specs.monaco;
   const currentSpec = specs[selectedComp] || specs.MEDIUM;
 
-  // Estimated penalty calculation
-  const slope = selectedComp === 'SOFT' ? 0.052 : selectedComp === 'MEDIUM' ? 0.038 : 0.024;
+  // Aerodynamic wake decay calculations: Delta_CL = -35% * exp(-gap / 0.85)
+  const downforceLossPct = Math.min(38.0, 35.0 * Math.exp(-followGap / 0.85));
+  const dirtyWearMultiplier = Number((1.0 + 0.35 * Math.exp(-followGap / 0.90)).toFixed(2));
+
+  // Estimated penalty calculation incorporating thermal degradation and dirty air
+  const slope = (selectedComp === 'SOFT' ? 0.052 : selectedComp === 'MEDIUM' ? 0.038 : 0.024) * dirtyWearMultiplier;
   const linearPenalty = Number((simLapAge * slope).toFixed(2));
   const isPastCliff = simLapAge > currentSpec.deg_cliff_lap;
   const cliffPenalty = isPastCliff ? Number(((simLapAge - currentSpec.deg_cliff_lap) * 0.12).toFixed(2)) : 0;
   const totalPenalty = Number((linearPenalty + cliffPenalty).toFixed(2));
-  const remainingRubberPct = Math.max(10, Math.round(100 - (simLapAge / currentSpec.deg_cliff_lap) * 75));
+  const remainingRubberPct = Math.max(10, Math.round(100 - (simLapAge / currentSpec.deg_cliff_lap) * 75 * dirtyWearMultiplier));
 
   return (
     <div className="f1-card p-5 flex flex-col gap-4">
@@ -141,6 +147,62 @@ export default function TireThermalTelemetry({ trackId = 'monaco', trackMeta }) 
               LINEAR WEAR REGIME (HUBER FIT)
             </span>
           )}
+        </div>
+      </div>
+
+      {/* Aerodynamic Development & Dirty-Air Wake Turbulence (JD Core: Aero x Performance x Strategy) */}
+      <div className="bg-[#080A0E] p-4 rounded-xs border border-white/[0.08] flex flex-col gap-3 font-mono text-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-2 gap-2">
+          <div className="flex items-center gap-2">
+            <Wind className="w-4 h-4 text-cyan-400" />
+            <strong className="text-white font-f1 uppercase tracking-wider text-sm">
+              Aerodynamic Development &bull; Turbulent Wake Degradation Coupling
+            </strong>
+          </div>
+          <span className="text-[10px] text-cyan-400 bg-cyan-950/40 border border-cyan-800/50 px-2 py-0.5 rounded-xs font-bold uppercase">
+            Venturi Tunnel Ground-Effect Model
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <div className="flex justify-between text-neutral-300 mb-1">
+              <span>FOLLOWING INTERVAL (&Delta;t_gap)</span>
+              <strong className="text-cyan-400 text-sm">{followGap.toFixed(1)}s</strong>
+            </div>
+            <input
+              type="range"
+              min="0.3"
+              max="3.0"
+              step="0.1"
+              value={followGap}
+              onChange={(e) => setFollowGap(parseFloat(e.target.value))}
+              className="w-full"
+            />
+            <div className="flex justify-between text-[9px] text-neutral-400 mt-1">
+              <span>0.3s (Turbulent Train)</span>
+              <span className={followGap < 1.0 ? 'text-[#FF1801] font-bold' : followGap < 1.8 ? 'text-amber-400 font-bold' : 'text-[#00E676] font-bold'}>
+                {followGap < 0.9 ? 'DIRTY AIR: Severe Downforce Loss' : followGap < 1.8 ? 'TURBULENT WAKE: High Slip' : 'CLEAN AIR: Optimal Laminar'}
+              </span>
+              <span>3.0s (Clean Air)</span>
+            </div>
+          </div>
+
+          <div className="bg-[#0D111A] p-3 rounded-xs border border-white/[0.06] flex flex-col justify-between">
+            <span className="text-[9px] text-neutral-400 uppercase font-bold">AERODYNAMIC DOWNFORCE LOSS</span>
+            <div className="text-2xl font-bold text-[#FF1801] mt-0.5">
+              -{downforceLossPct.toFixed(1)}%
+            </div>
+            <span className="text-[10px] text-neutral-400">Front wing vortex authority decay</span>
+          </div>
+
+          <div className="bg-[#0D111A] p-3 rounded-xs border border-white/[0.06] flex flex-col justify-between">
+            <span className="text-[9px] text-neutral-400 uppercase font-bold">DIRTY-AIR WEAR MULTIPLIER</span>
+            <div className="text-2xl font-bold text-amber-400 mt-0.5">
+              {dirtyWearMultiplier.toFixed(2)}x
+            </div>
+            <span className="text-[10px] text-neutral-400">Micro-slip thermal graining acceleration</span>
+          </div>
         </div>
       </div>
     </div>

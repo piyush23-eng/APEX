@@ -509,28 +509,45 @@ export default function App() {
               </div>
 
               <div className="bg-[#0A0D14] p-3.5 rounded-xs border border-white/[0.08]">
-                <strong className="text-white font-f1 text-sm block mb-1">2. HUBER M-ESTIMATOR LOSS FUNCTION</strong>
+                <strong className="text-white font-f1 text-sm block mb-1">2. HUBER M-ESTIMATOR ROBUST REGRESSION (SCIKIT-LEARN)</strong>
                 <p>
                   Ordinary Least Squares (OLS) is highly vulnerable to telemetry outliers caused by traffic lifts, blue flag slowdowns, and yellow flag sectors. We fit tire wear slopes using Huber loss (delta = 1.345), which transitions from quadratic error for small residuals to linear error for large residuals:
                 </p>
                 <div className="p-2 bg-black/60 rounded-xs text-amber-300 font-mono mt-1.5 font-bold">
                   L_delta(r) = 0.5 * r^2 (for |r| &lt;= 1.345) else 1.345 * (|r| - 0.5 * 1.345)
                 </div>
-              </div>
-
-              <div className="bg-[#0A0D14] p-3.5 rounded-xs border border-white/[0.08]">
-                <strong className="text-white font-f1 text-sm block mb-1">3. STOCHASTIC SAFETY CAR PIT WINDOW DELTA</strong>
-                <p>
-                  Pit lane transit under green flag conditions incurs a stationary pit stop plus transit speed limiter delta of 20.25s against cars traveling at 300+ km/h. Under Safety Car conditions, the pack is neutralized to ~60% throttle pace, reducing the net pit stop time loss to ~11.75s—granting an 8.5s to 11.8s tactical bonus.
+                <p className="mt-1 text-[11px] text-neutral-400">
+                  Executed via <code className="text-cyan-400">pipeline/tire_degradation_huber.py</code> directly on FastF1 10Hz CAN-bus telemetry.
                 </p>
               </div>
 
               <div className="bg-[#0A0D14] p-3.5 rounded-xs border border-white/[0.08]">
-                <strong className="text-white font-f1 text-sm block mb-1">4. BOUNDARY CONDITIONS &amp; NUMERICAL CONSTRAINTS</strong>
+                <strong className="text-white font-f1 text-sm block mb-1">3. AERODYNAMIC GROUND-EFFECT &amp; DIRTY-AIR WAKE TURBULENCE</strong>
+                <p>
+                  When trailing within 1.5s of a rival chassis, turbulent venturi vortex upwash degrades front wing authority. We model exponential downforce decay and micro-slip tire degradation acceleration:
+                </p>
+                <div className="p-2 bg-black/60 rounded-xs text-cyan-400 font-mono mt-1.5 font-bold">
+                  Delta_CL(gap) = -0.35 * exp(-gap / 0.85)  |  alpha_dirty = alpha_clean * (1.0 + 0.35 * exp(-gap / 0.90))
+                </div>
+                <p className="mt-1 text-[11px] text-neutral-400">
+                  Couples aerodynamic development, vehicle slip-angle heating, and pit-wall tactical strategy (<code className="text-cyan-400">pipeline/aero_performance_model.py</code>).
+                </p>
+              </div>
+
+              <div className="bg-[#0A0D14] p-3.5 rounded-xs border border-white/[0.08]">
+                <strong className="text-white font-f1 text-sm block mb-1">4. VECTORIZED MONTE CARLO STOCHASTIC SOLVER</strong>
+                <p>
+                  We simulate N=1,000 stochastic race trajectories per candidate strategy via <code className="text-cyan-400">pipeline/monte_carlo_solver.py</code>. Safety Car deployment is modeled as a Bernoulli process using circuit historical priors. Pit lane stationary wheel gun duration is modeled as Gaussian variable (&mu;=2.45s, &sigma;=0.30s), granting an 8.5s to 11.8s tactical bonus under SC.
+                </p>
+              </div>
+
+              <div className="bg-[#0A0D14] p-3.5 rounded-xs border border-white/[0.08]">
+                <strong className="text-white font-f1 text-sm block mb-1">5. PRODUCTION PYTHON PIPELINE &amp; JUPYTER REPRODUCIBILITY</strong>
                 <ul className="list-disc list-inside space-y-1 text-neutral-300 mt-1">
-                  <li>Wake turbulence &amp; downforce decay in follow mode (&lt;1.0s dirty air) not dynamically coupled into clean-air baseline.</li>
-                  <li>Chassis telemetry calibrated to front-running driver baselines (Verstappen / Leclerc 10Hz traces).</li>
-                  <li>Stationary wheel gun service modeled as stochastic Gaussian variable (&mu;=2.45s, &sigma;=0.30s).</li>
+                  <li>CLI Execution: <code className="text-[#00E676]">python -m pipeline.run_pipeline --tracks monaco hungary silverstone monza bahrain</code></li>
+                  <li>Jupyter Notebook: <code className="text-cyan-400">notebooks/01_f1_telemetry_strategy_ml.ipynb</code> (13 executable cells with mathematical derivations &amp; residual plots).</li>
+                  <li>FastAPI REST Backend: <code className="text-amber-400">api/main.py</code> exposing <code className="text-white">/degradation-curve</code>, <code className="text-white">/simulate</code>, <code className="text-white">/aerodynamics</code>, <code className="text-white">/validate</code>.</li>
+                  <li>Validation Audit: Empirically benchmarked against official FIA race outcomes across 5 distinct Grand Prix circuits.</li>
                 </ul>
               </div>
             </div>

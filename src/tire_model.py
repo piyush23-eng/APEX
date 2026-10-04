@@ -56,7 +56,7 @@ from typing import Dict, Any, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, HuberRegressor
 from sklearn.metrics import r2_score, mean_squared_error
 import matplotlib
 matplotlib.use('Agg')
@@ -184,14 +184,27 @@ def get_degradation_curve(
     X = df_comp[["TyreLife"]].values
     y = df_comp["FuelCorrectedLapTime"].values
 
-    model = LinearRegression()
-    model.fit(X, y)
-
-    slope = float(model.coef_[0])
-    intercept = float(model.intercept_)
-    pred = model.predict(X)
-    r2 = max(0.0, float(r2_score(y, pred)))
-    rmse = float(np.sqrt(mean_squared_error(y, pred)))
+    # Fit robust M-estimator using Huber loss (delta = 1.345) to resist traffic / dirty-air outliers
+    estimator_used = "Huber M-Estimator"
+    try:
+        model = HuberRegressor(epsilon=1.345, alpha=0.0001, max_iter=300)
+        model.fit(X, y)
+        slope = float(model.coef_[0])
+        intercept = float(model.intercept_)
+        pred = model.predict(X)
+        r2 = max(0.0, float(r2_score(y, pred)))
+        rmse = float(np.sqrt(mean_squared_error(y, pred)))
+        outlier_count = int(np.sum(model.outliers_)) if hasattr(model, 'outliers_') else 0
+    except Exception:
+        model = LinearRegression()
+        model.fit(X, y)
+        slope = float(model.coef_[0])
+        intercept = float(model.intercept_)
+        pred = model.predict(X)
+        r2 = max(0.0, float(r2_score(y, pred)))
+        rmse = float(np.sqrt(mean_squared_error(y, pred)))
+        outlier_count = 0
+        estimator_used = "OLS (Fallback)"
 
     return {
         "track": track,
@@ -202,6 +215,8 @@ def get_degradation_curve(
         "r2": r2,
         "rmse": rmse,
         "sample_size": len(df_comp),
+        "outlier_count": outlier_count,
+        "estimator": estimator_used,
         "formula": f"FuelCorrectedLapTime = {slope:+.4f} * TyreAge + {intercept:.3f}"
     }
 
@@ -213,7 +228,7 @@ def fit_all_compounds(
     fuel_burn_rate: float = DEFAULT_FUEL_CORRECTION_PER_LAP
 ) -> Dict[str, Dict[str, Any]]:
     """
-    Fits simple linear degradation models for SOFT, MEDIUM, and HARD compounds.
+    Fits robust Huber degradation models for SOFT, MEDIUM, and HARD compounds.
     """
     results = {}
     for comp in ["SOFT", "MEDIUM", "HARD"]:
@@ -225,6 +240,41 @@ def fit_all_compounds(
             fuel_burn_rate=fuel_burn_rate
         )
     return results
+
+
+class TrackTireModel:
+    """
+    Object-oriented wrapper for track-level Pirelli tire degradation modeling.
+    Provides scikit-learn compatible fit and summary methods for EDA notebooks.
+    """
+    def __init__(self, track: str = "Monaco", year: int = 2023, fuel_burn_rate: float = DEFAULT_FUEL_CORRECTION_PER_LAP):
+        self.track = track
+        self.year = year
+        self.fuel_burn_rate = fuel_burn_rate
+        self.models: Dict[str, Dict[str, Any]] = {}
+
+    def fit_from_dataframe(self, clean_df: pd.DataFrame):
+        self.models = fit_all_compounds(
+            clean_df=clean_df,
+            track=self.track,
+            year=self.year,
+            fuel_burn_rate=self.fuel_burn_rate
+        )
+        return self
+
+    def get_summary_table(self) -> pd.DataFrame:
+        rows = []
+        for comp, m in self.models.items():
+            rows.append({
+                "Compound": comp,
+                "Degradation Slope": f"{m['slope']:+.4f} s/lap",
+                "Base Pace (s)": f"{m['intercept']:.3f} s",
+                "R² Score": f"{m['r2']:.3f}",
+                "RMSE (s)": f"{m['rmse']:.3f} s",
+                "Clean Laps": m["sample_size"],
+                "Estimator": m.get("estimator", "Huber M-Estimator")
+            })
+        return pd.DataFrame(rows)
 
 
 def plot_degradation_curves(
