@@ -50,10 +50,12 @@ export default function App() {
   }, [currentTrackMeta]);
 
   const [customSimData, setCustomSimData] = useState(null);
+  const [calibratedBadge, setCalibratedBadge] = useState(null);
 
   // Reset custom simulation data on track switch
   useEffect(() => {
     setCustomSimData(null);
+    setCalibratedBadge(null);
     setSelectedRank(1);
   }, [selectedTrackId]);
 
@@ -140,6 +142,14 @@ export default function App() {
         optimal_strategy: finalized[0]
       });
       setSelectedRank(1);
+      setPrimaryTelemetryTab('UNDERCUT'); // Switch directly to Strategy Solver Tab
+      setCalibratedBadge({
+        wear: wearMultiplier,
+        sc: scProbOverride,
+        pitLoss: pitLossOverride,
+        p1Name: finalized[0].name,
+        p1Time: finalized[0].formatted_mean
+      });
       setIsSimulating(false);
     }, 400);
   };
@@ -239,33 +249,35 @@ export default function App() {
             </div>
           </div>
 
-          {/* Card 2: HISTORICAL SAFETY CAR PROBABILITY */}
+          {/* Card 2: HISTORICAL / CALIBRATED SAFETY CAR PROBABILITY */}
           <div className="f1-card p-4 flex items-center justify-between">
             <div>
               <span className="text-xs font-mono text-neutral-300 uppercase tracking-wider font-bold">
-                HISTORICAL SAFETY CAR RATE
+                {scProbOverride !== currentTrackMeta.historical_sc_rate ? 'CALIBRATED SC RATE' : 'HISTORICAL SAFETY CAR RATE'}
               </span>
               <div className="font-mono text-3xl font-extrabold text-white mt-0.5">
-                {(currentTrackMeta.historical_sc_rate * 100).toFixed(0)}<span className="text-[#FF1801] text-xl font-bold">%</span>
+                {(scProbOverride * 100).toFixed(0)}<span className="text-[#FF1801] text-xl font-bold">%</span>
               </div>
               <div className="text-xs font-mono text-neutral-400 mt-0.5">
-                Stochastic Deployment Window
+                {scProbOverride !== currentTrackMeta.historical_sc_rate
+                  ? `Calibrated • Base: ${(currentTrackMeta.historical_sc_rate * 100).toFixed(0)}%`
+                  : 'Stochastic Deployment Window'}
               </div>
             </div>
             <ShieldAlert className="w-9 h-9 text-[#FF1801] opacity-90" />
           </div>
 
-          {/* Card 3: EMPIRICAL PIT LOSS DELTA */}
+          {/* Card 3: EMPIRICAL / CALIBRATED PIT LOSS DELTA */}
           <div className="f1-card p-4 flex items-center justify-between">
             <div>
               <span className="text-xs font-mono text-neutral-300 uppercase tracking-wider font-bold">
-                EMPIRICAL PIT LOSS DELTA
+                {pitLossOverride !== currentTrackMeta.green_pit_loss ? 'CALIBRATED PIT TRANSIT' : 'EMPIRICAL PIT LOSS DELTA'}
               </span>
               <div className="font-mono text-3xl font-extrabold text-white mt-0.5">
-                {currentTrackMeta.green_pit_loss.toFixed(1)}<span className="text-neutral-400 text-sm font-normal">s</span>
+                {pitLossOverride.toFixed(1)}<span className="text-neutral-400 text-sm font-normal">s</span>
               </div>
               <div className="text-xs font-mono text-emerald-400 font-bold mt-0.5">
-                SC Pit Loss Delta: {currentTrackMeta.sc_pit_loss.toFixed(1)}s (+{(currentTrackMeta.green_pit_loss - currentTrackMeta.sc_pit_loss).toFixed(1)}s Net Advantage)
+                SC Pit Loss Delta: {currentTrackMeta.sc_pit_loss.toFixed(1)}s (+{(pitLossOverride - currentTrackMeta.sc_pit_loss).toFixed(1)}s Net Advantage)
               </div>
             </div>
             <Gauge className="w-9 h-9 text-emerald-400 opacity-90" />
@@ -293,6 +305,36 @@ export default function App() {
             <Flame className="w-9 h-9 text-[#FF1801] opacity-90" />
           </div>
         </div>
+
+        {/* Live Calibration Banner */}
+        {calibratedBadge && (
+          <div className="bg-[#0C121D] border-l-4 border-l-[#00E676] border border-white/[0.1] p-3.5 rounded-xs flex flex-col md:flex-row md:items-center justify-between gap-3 font-mono text-xs shadow-xl animate-fade-in">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#00E676] animate-pulse" />
+              <strong className="text-[#00E676] uppercase tracking-wider font-bold">SOLVER RE-CALIBRATED:</strong>
+              <span className="text-neutral-300">Wear Multiplier: <strong className="text-white font-bold">{calibratedBadge.wear.toFixed(2)}x</strong></span>
+              <span className="text-neutral-600">|</span>
+              <span className="text-neutral-300">Safety Car Probability: <strong className="text-white font-bold">{Math.round(calibratedBadge.sc * 100)}%</strong></span>
+              <span className="text-neutral-600">|</span>
+              <span className="text-neutral-300">Pit Loss: <strong className="text-white font-bold">{calibratedBadge.pitLoss.toFixed(1)}s</strong></span>
+              <span className="text-neutral-500">&rarr;</span>
+              <span className="text-amber-300 font-bold">New Optimal P1: {calibratedBadge.p1Name} ({calibratedBadge.p1Time})</span>
+            </div>
+            <button
+              onClick={() => {
+                setCustomSimData(null);
+                setCalibratedBadge(null);
+                setScProbOverride(currentTrackMeta.historical_sc_rate);
+                setPitLossOverride(currentTrackMeta.green_pit_loss);
+                setWearMultiplier(1.0);
+                setSelectedRank(1);
+              }}
+              className="text-[10px] text-neutral-400 hover:text-white uppercase font-bold underline cursor-pointer shrink-0"
+            >
+              Reset to Track Defaults
+            </button>
+          </div>
+        )}
 
         {/* Collapsible Simulation Sensitivity Drawer */}
         {showConfigModal && (
