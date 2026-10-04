@@ -48,8 +48,16 @@ export default function App() {
     }
   }, [currentTrackMeta]);
 
+  const [customSimData, setCustomSimData] = useState(null);
+
+  // Reset custom simulation data on track switch
+  useEffect(() => {
+    setCustomSimData(null);
+    setSelectedRank(1);
+  }, [selectedTrackId]);
+
   const degData = f1Data.degradation[selectedTrackId];
-  const simData = f1Data.simulations[selectedTrackId];
+  const simData = customSimData || f1Data.simulations[selectedTrackId];
   const valData = f1Data.validation[selectedTrackId];
 
   // Active strategy
@@ -61,12 +69,78 @@ export default function App() {
   const optimalPitLap = activeStrategy && activeStrategy.pit_laps.length > 0 ? activeStrategy.pit_laps[0] : 32;
   const optimalCompound = activeStrategy && activeStrategy.stints.length > 1 ? activeStrategy.stints[1].compound : 'HARD';
 
-  // Trigger simulated Monte Carlo batch
+  function formatHMS(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = (seconds % 60).toFixed(3);
+    return `${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+  }
+
+  // Trigger simulated Monte Carlo batch with real mathematical recalculation
   const handleRunSimulation = () => {
     setIsSimulating(true);
     setTimeout(() => {
+      if (!f1Data.simulations[selectedTrackId]) {
+        setIsSimulating(false);
+        return;
+      }
+      const baseStrategies = f1Data.simulations[selectedTrackId].strategies;
+      const degModels = degData ? degData.models : {};
+      const fuelRate = currentTrackMeta.fuel_burn_rate || 0.035;
+      const scPitLoss = currentTrackMeta.sc_pit_loss || 11.75;
+      const effectivePitLoss = pitLossOverride * (1 - scProbOverride) + scPitLoss * scProbOverride;
+
+      const recalculated = baseStrategies.map(strat => {
+        let totalRaceTime = 0;
+        let currentLap = 0;
+
+        strat.stints.forEach(stint => {
+          const comp = stint.compound;
+          const length = stint.length;
+          const model = degModels[comp] || { slope: 0.035, intercept: 80, deg_cliff_lap: 35 };
+          const effectiveSlope = model.slope * wearMultiplier;
+
+          for (let lap = 1; lap <= length; lap++) {
+            const lapIdx = currentLap + lap - 1;
+            let lapTime = model.intercept + (effectiveSlope * lap) - (lapIdx * fuelRate);
+            if (lap > model.deg_cliff_lap) {
+              const cliffExcess = lap - model.deg_cliff_lap;
+              lapTime += 0.12 * Math.pow(cliffExcess, 1.35);
+            }
+            totalRaceTime += lapTime;
+          }
+          currentLap += length;
+        });
+
+        // Add pit stop execution duration
+        const stops = strat.stops !== undefined ? strat.stops : (strat.stints.length - 1);
+        totalRaceTime += stops * effectivePitLoss;
+
+        return {
+          ...strat,
+          mean_total_time: totalRaceTime,
+          formatted_mean: formatHMS(totalRaceTime)
+        };
+      });
+
+      // Sort by fastest expected total time
+      recalculated.sort((a, b) => a.mean_total_time - b.mean_total_time);
+      const fastest = recalculated[0].mean_total_time;
+
+      const finalized = recalculated.map((s, idx) => ({
+        ...s,
+        rank: idx + 1,
+        delta_to_best: Number((s.mean_total_time - fastest).toFixed(2))
+      }));
+
+      setCustomSimData({
+        ...f1Data.simulations[selectedTrackId],
+        strategies: finalized,
+        optimal_strategy: finalized[0]
+      });
+      setSelectedRank(1);
       setIsSimulating(false);
-    }, 500);
+    }, 400);
   };
 
   return (
