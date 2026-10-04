@@ -1,0 +1,10 @@
+# Ignore Python backend and data from Vercel deployment
+api/
+pipeline/
+src/
+notebooks/
+tests/
+data/
+requirements.txt
+Dockerfile
+.venv/
