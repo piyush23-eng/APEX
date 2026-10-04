@@ -3,6 +3,7 @@ import FastF1TelemetryChannels from './components/FastF1TelemetryChannels';
 import LiveTimingTower from './components/LiveTimingTower';
 import UndercutOvercutSimulator from './components/UndercutOvercutSimulator';
 import TireThermalTelemetry from './components/TireThermalTelemetry';
+import StrategySensitivityHeatmap from './components/StrategySensitivityHeatmap';
 import TelemetryHub from './components/TelemetryHub';
 import {
   Activity,
@@ -501,6 +502,16 @@ export default function App() {
                 <UndercutOvercutSimulator
                   trackMeta={currentTrackMeta}
                   degData={degData}
+                />
+                <StrategySensitivityHeatmap
+                  trackId={selectedTrackId}
+                  currentWearMult={wearMultiplier}
+                  currentScProb={scProbOverride}
+                  onApplyScenario={(scProb, wear) => {
+                    setScProbOverride(scProb);
+                    setWearMultiplier(wear);
+                    handleRunSimulation();
+                  }}
                 />
                 <TelemetryHub
                   trackMeta={currentTrackMeta}
