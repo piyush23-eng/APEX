@@ -1,10 +1,15 @@
-# Ignore Python backend and data from Vercel deployment
-api/
-pipeline/
-src/
-notebooks/
-tests/
-data/
+# Ignore Python backend and root files from Vercel deployment
+/api/
+/pipeline/
+/src/
+/notebooks/
+/tests/
+/data/
+/Dockerfile
 requirements.txt
-Dockerfile
 .venv/
+
+# Ensure frontend is never ignored
+!frontend/
+!frontend/**
+
