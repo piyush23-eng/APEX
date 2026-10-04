@@ -30,8 +30,10 @@ import {
   Zap,
   Filter,
   BarChart2,
-  Compass
+  Compass,
+  Brain
 } from 'lucide-react';
+import BayesianOnlineUpdaterView from './BayesianOnlineUpdaterView';
 
 const COMPOUND_COLORS = {
   SOFT: '#E10600',
@@ -166,7 +168,8 @@ export default function TelemetryHub({
               { id: 'STRATEGY_DECK', label: '1. MONTE CARLO RACE STRATEGY SOLVER' },
               { id: 'TIRE_SIGNAL', label: '2. HUBER LOSS TIRE DEGRADATION REGRESSION' },
               { id: 'GAP_DELTA', label: '3. CUMULATIVE RACE TIME GAP DELTA TO P1' },
-              { id: 'VALIDATION', label: '4. FIA OFFICIAL RACE GROUND-TRUTH VALIDATION' }
+              { id: 'VALIDATION', label: '4. FIA OFFICIAL RACE GROUND-TRUTH VALIDATION' },
+              { id: 'BAYESIAN', label: '5. IN-RACE BAYESIAN ONLINE LEARNING' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -623,6 +626,14 @@ export default function TelemetryHub({
             </p>
           </div>
         </div>
+      )}
+
+      {/* VIEW 5: IN-RACE BAYESIAN ONLINE LEARNING & DRIFT CONTROLLER */}
+      {activeSubTab === 'BAYESIAN' && (
+        <BayesianOnlineUpdaterView
+          trackId={trackMeta.id}
+          trackMeta={trackMeta}
+        />
       )}
     </div>
   );
